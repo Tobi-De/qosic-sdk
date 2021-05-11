@@ -1,16 +1,23 @@
+import logging
 import re
 import secrets
 import time
-from queue import Queue
 from typing import Callable, Union
 
-from .exceptions import InvalidPhoneNumberError, PollTimeoutError, ProviderNotFoundError
+from .exceptions import (
+    InvalidPhoneNumberError,
+    PollRuntimeError,
+    PollTimeoutError,
+    ProviderNotFoundError,
+)
 
 RANDOM_STRING_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
 
 MTN_PREFIXES = ["97", "96", "66", "67", "61", "62", "69", "91", "90", "51"]
 MOOV_PREFIXES = ["68", "98", "99", "95", "94", "60", "64", "63", "65"]
+
+LOGGER = logging.getLogger(__name__)
 
 
 def guess_provider(phone: str) -> str:
@@ -44,7 +51,7 @@ def poll(
 ):
 
     kwargs = kwargs or dict()
-    values = Queue()
+    values = list()
 
     max_time = time.time() + timeout
     last_item = None
@@ -53,16 +60,17 @@ def poll(
             val = target(**kwargs)
             last_item = val
         except Exception as e:
-            last_item = e
+            raise PollRuntimeError(f"poll() catch an exception: {e}")
         else:
             # Condition passes, this is the only "successful" exit from the polling function
             if check_success(val):
                 return val
 
-        values.put(last_item)
+        values.append(last_item)
 
         # Check the time after to make sure the poll function is called at least once
-        if max_time is not None and time.time() >= max_time:
-            raise PollTimeoutError(values, last_item)
+        if time.time() >= max_time:
+            return last_item
+            # raise PollTimeoutError(values)
 
         time.sleep(step)

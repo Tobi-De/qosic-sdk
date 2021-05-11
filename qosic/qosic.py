@@ -76,8 +76,9 @@ class Client:
         response = self._send_request(
             url=url, payload={"clientid": client_id, "transref": trans_ref}
         )
+        json_content = response.json()
 
-        if response.status_code == 200 and response.content.responsecode == "00":
+        if response.status_code == 200 and json_content["responsecode"] == "00":
             state = State.SUCCESS
         elif response.status_code == 401:
             raise InvalidCredentialError
@@ -103,17 +104,18 @@ class Client:
     def _make_mtn_payment(self, payload) -> State:
         url = self.context + self.mtn_payment_path
         response = self._send_request(url=url, payload=payload)
+        json_content = response.json()
 
-        if response.status_code == 202 and response.content.responsecode == "01":
+        if response.status_code == 202 and json_content["responsecode"] == "01":
             state = poll(
                 target=self._fetch_transaction_status,
-                step=60,
-                timeout=60 * 3,
+                step=30,
+                timeout=60 * 2,
                 kwargs={
                     "trans_ref": payload["transref"],
                     "client_id": payload["clientid"],
                 },
-                check_success=lambda val: val == state.SUCCESS,
+                check_success=lambda val: val == State.SUCCESS,
             )
         elif response.status_code == 401:
             raise InvalidCredentialError
@@ -128,7 +130,9 @@ class Client:
         response = self._send_request(
             url=url, payload={"clientid": client_id, "transref": trans_ref}
         )
-        if response.status_code == 200 and response.content.responsecode == "0":
+        json_content = response.json()
+
+        if response.status_code == 200 and json_content["responsecode"] == "0":
             state = State.SUCCESS
         elif response.status_code == 401:
             raise InvalidCredentialError
@@ -139,7 +143,9 @@ class Client:
     def _make_moov_payment(self, payload: dict) -> State:
         url = self.context + self.moov_payment_path
         response = self._send_request(url=url, payload=payload)
-        if response.status_code == 202 and response.content.responsecode == "0":
+        json_content = response.json()
+
+        if response.status_code == 202 and json_content["responsecode"] == "0":
             state = State.SUCCESS
         elif response.status_code == 401:
             raise InvalidCredentialError
@@ -149,7 +155,6 @@ class Client:
 
     def guess_client_id(self, phone: str) -> str:
         provider_name = guess_provider(phone)
-        print(self.providers)
         for provider in self.providers:
             if provider_name == provider.name:
                 return provider.client_id

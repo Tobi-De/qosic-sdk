@@ -24,11 +24,13 @@ class InvalidCredentialError(Exception):
         super().__init__(message)
 
 
+class PollRuntimeError(Exception):
+    """Exception raised if polling function fails"""
+
+
 class PollTimeoutError(Exception):
     """Exception raised if polling function times out"""
 
-    def __init__(self, values, last=None):
-        self.values = values
-        self.last = last
-        message = f"result:  {self.values} ,  {self.last}"
+    def __init__(self, values):
+        message = f"result : {values}"
         super().__init__(message)
