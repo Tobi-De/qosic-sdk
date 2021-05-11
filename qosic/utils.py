@@ -1,26 +1,68 @@
+import re
 import secrets
-from .exceptions import InvalidProvider
+import time
+from queue import Queue
+from typing import Callable, Union
+
+from .exceptions import InvalidPhoneNumberError, PollTimeoutError, ProviderNotFoundError
 
 RANDOM_STRING_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
 
 MTN_PREFIXES = ["97", "96", "66", "67", "61", "62", "69", "91", "90", "51"]
 MOOV_PREFIXES = ["68", "98", "99", "95", "94", "60", "64", "63", "65"]
 
 
-def guess_provider(phone_number: str) -> str:
-    phone_number = clean_phone_number(phone_number)
-    # Ex: 22963588213
-    prefixe = phone_number[3:5]
+def guess_provider(phone: str) -> str:
+    phone = clean_phone(phone)
+    prefixe = phone[3:5]
     if prefixe in MOOV_PREFIXES:
         return "MOOV"
     if prefixe in MTN_PREFIXES:
         return "MTN"
-    raise InvalidProvider
+    raise ProviderNotFoundError(phone=phone)
 
 
 def get_random_string(length: int = 8, allowed_chars: str = RANDOM_STRING_CHARS) -> str:
     return "".join(secrets.choice(allowed_chars) for i in range(length))
 
 
-def clean_phone_number(phone_number):
-    pass
+def clean_phone(phone: str):
+    if not re.fullmatch(r"(\+?)\d{11}", phone):
+        raise InvalidPhoneNumberError
+    if "+" in phone:
+        return phone[1:]
+    return phone
+
+
+def poll(
+    target: Callable,
+    step: int,
+    timeout: int,
+    kwargs: Union[dict, None] = None,
+    check_success: Callable = lambda val: bool(val),
+):
+
+    kwargs = kwargs or dict()
+    values = Queue()
+
+    max_time = time.time() + timeout
+    last_item = None
+    while True:
+        try:
+            val = target(**kwargs)
+            last_item = val
+        except Exception as e:
+            last_item = e
+        else:
+            # Condition passes, this is the only "successful" exit from the polling function
+            if check_success(val):
+                return val
+
+        values.put(last_item)
+
+        # Check the time after to make sure the poll function is called at least once
+        if max_time is not None and time.time() >= max_time:
+            raise PollTimeoutError(values, last_item)
+
+        time.sleep(step)
