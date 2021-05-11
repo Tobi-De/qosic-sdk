@@ -14,7 +14,7 @@ def client():
     """
     # import requests
     # return requests.get('https://github.com/audreyr/cookiecutter-pypackage')
-    return Client(login="", password="", provider=[])
+    return Client(login="", password="", providers=[])
 
 
 def test_request_payment(client):
