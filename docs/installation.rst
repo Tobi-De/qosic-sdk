@@ -32,7 +32,7 @@ You can either clone the public repository:
 
 .. code-block:: console
 
-    $ git clone git://github.com/Tobi-De/qosic
+    $ git clone git://github.com/Tobi-De/qosic-sdk
 
 Or download the `tarball`_:
 
