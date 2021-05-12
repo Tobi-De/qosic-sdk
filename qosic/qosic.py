@@ -6,7 +6,11 @@ from typing import List
 
 import httpx
 
-from .exceptions import ProviderNotFoundError, InvalidCredentialsError, RequestError
+from .exceptions import (
+    ProviderNotFoundError,
+    InvalidCredentialsError,
+    RequestError,
+)
 from .utils import clean_phone, get_random_string, guess_provider, poll
 
 REFUND_PATH = "/QosicBridge/user/refund"
@@ -30,8 +34,9 @@ class State(Enum):
 
 @dataclass
 class Provider:
-    """Represents a provider support by the QosIC platform, you can check their docs at https://www.qosic.com/docs/.
-    For now only two providers are supported, MTN and MOOV.
+    """Represents a provider support by the QosIC platform, you can check
+    their docs at https://www.qosic.com/docs/.For now only two providers are supported,
+    MTN and MOOV.
     :param name: The name of the provider in capital letter
     :param client_id: Your client Id, check on your QosIc account.
     """
@@ -65,7 +70,9 @@ class Client:
     password: str
     context: str = "https://qosic.net:8443"
 
-    def request_payment(self, phone: str, amount: int, **kwargs) -> Result:
+    def request_payment(
+        self, phone: str, amount: int, first_name: str = None, last_name: str = None
+    ) -> Result:
         client_id = self.guess_client_id(phone=phone)
         payload = {
             "clientid": client_id,
@@ -73,11 +80,9 @@ class Client:
             "amount": str(amount),
             "transref": get_random_string(),
         }
-        first_name = kwargs.pop("first_name")
         if first_name:
             payload["firstname"] = first_name
-        last_name = kwargs.pop("first_name")
-        if first_name:
+        if last_name:
             payload["lastname"] = last_name
 
         provider = guess_provider(phone)

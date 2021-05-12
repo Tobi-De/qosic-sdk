@@ -1,6 +1,6 @@
 """Top-level package for qosic-sdk."""
-from .qosic import *
+from .qosic import * # noqa
 
 __author__ = """Tobi DEGNON"""
 __email__ = "degnonfrancis@gmail.com"
-__version__ = "0.1.0"
+__version__ = "0.1.1"

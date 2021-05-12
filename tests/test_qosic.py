@@ -3,7 +3,7 @@
 """Tests for `qosic` package."""
 
 import pytest
-from qosic import Client, Provider
+from qosic import Client
 
 
 @pytest.fixture
