@@ -6,23 +6,44 @@ from typing import List
 
 import httpx
 
-from .exceptions import ProviderNotFoundError, InvalidCredentialError, RequestError
+from .exceptions import ProviderNotFoundError, InvalidCredentialsError, RequestError
 from .utils import clean_phone, get_random_string, guess_provider, poll
+
+REFUND_PATH = "/QosicBridge/user/refund"
+MTN_PAYMENT_PATH = "/QosicBridge/user/requestpayment"
+MTN_PAYMENT_STATUS_PATH = "/QosicBridge/user/gettransactionstatus"
+MOOV_PAYMENT_PATH = "/QosicBridge/user/requestpaymentmv"
 
 
 class State(Enum):
-    SUCCESS = "Operation was successful"
-    FAILURE = "Operation was unsuccessful"
+    """A helper class that represents the state of your payment request."""
+
+    CONFIRMED = 1, "Operation was successful"
+    REJECTED = 0, "Operation was rejected"
+
+    def __str__(self):
+        return f"{self.name}: {self.value[1]}"
+
+    def __bool__(self):
+        return bool(self.value[0])
 
 
 @dataclass
 class Provider:
+    """Represents a provider support by the QosIC platform, you can check their docs at https://www.qosic.com/docs/.
+    For now only two providers are supported, MTN and MOOV.
+    :param name: The name of the provider in capital letter
+    :param client_id: Your client Id, check on your QosIc account.
+    """
+
     name: str
     client_id: str
 
 
 @dataclass
 class Result:
+    """A helper class to summarize the responses from the server."""
+
     state: State
     trans_ref: str
     client_id: str
@@ -32,14 +53,17 @@ class Result:
 
 @dataclass
 class Client:
+    """The synchronous client that will be used to make the request to the QosIc api.
+    :param providers: The list of your provider.
+    :param login: Your server authentication login/user.
+    :param password: Your server authentication password.
+    :param context: The QosIC server root domain if you ever need to change it.
+    """
+
     providers: List[Provider]
     login: str
     password: str
     context: str = "https://qosic.net:8443"
-    refund_path: str = "/QosicBridge/user/refund"
-    mtn_payment_path: str = "/QosicBridge/user/requestpayment"
-    mtn_payment_status_path: str = "/QosicBridge/user/gettransactionstatus"
-    moov_payment_path: str = "/QosicBridge/user/requestpaymentmv"
 
     def request_payment(self, phone: str, amount: int, **kwargs) -> Result:
         client_id = self.guess_client_id(phone=phone)
@@ -48,11 +72,13 @@ class Client:
             "msisdn": clean_phone(phone),
             "amount": str(amount),
             "transref": get_random_string(),
-            "firstname": (
-                kwargs.pop("first_name", None) or kwargs.pop("firstname", None)
-            ),
-            "lastname": kwargs.pop("last_name", None) or kwargs.pop("lastname", None),
         }
+        first_name = kwargs.pop("first_name")
+        if first_name:
+            payload["firstname"] = first_name
+        last_name = kwargs.pop("first_name")
+        if first_name:
+            payload["lastname"] = last_name
 
         provider = guess_provider(phone)
         if provider == "MTN":
@@ -72,20 +98,20 @@ class Client:
         if not client_id:
             raise ProviderNotFoundError
 
-        url = self.context + self.refund_path
+        url = self.context + REFUND_PATH
         response = self._send_request(
             url=url, payload={"clientid": client_id, "transref": trans_ref}
         )
         json_content = response.json()
 
         if response.status_code == 200 and json_content["responsecode"] == "00":
-            state = State.SUCCESS
+            state = State.CONFIRMED
         elif response.status_code == 401:
-            raise InvalidCredentialError
+            raise InvalidCredentialsError
         elif response.status_code == 404:
             raise ProviderNotFoundError
         else:
-            state = State.FAILURE
+            state = State.REJECTED
         return Result(client_id=client_id, trans_ref=trans_ref, state=state)
 
     def _send_request(self, url: str, payload: dict) -> httpx.Response:
@@ -96,13 +122,13 @@ class Client:
                 headers={"content-type": "application/json"},
                 json=payload,
                 verify=False,
-                timeout=60,
+                timeout=80,
             )
         except httpx.RequestError as exc:
             raise RequestError(request=exc.request)
 
     def _make_mtn_payment(self, payload) -> State:
-        url = self.context + self.mtn_payment_path
+        url = self.context + MTN_PAYMENT_PATH
         response = self._send_request(url=url, payload=payload)
         json_content = response.json()
 
@@ -115,42 +141,41 @@ class Client:
                     "trans_ref": payload["transref"],
                     "client_id": payload["clientid"],
                 },
-                check_success=lambda val: val == State.SUCCESS,
             )
         elif response.status_code == 401:
-            raise InvalidCredentialError
+            raise InvalidCredentialsError
         elif response.status_code == 404:
             raise ProviderNotFoundError(phone=payload["msisdn"])
         else:
-            state = State.FAILURE
+            state = State.REJECTED
         return state
 
     def _fetch_transaction_status(self, trans_ref: str, client_id: str) -> State:
-        url = self.context + self.mtn_payment_status_path
+        url = self.context + MTN_PAYMENT_STATUS_PATH
         response = self._send_request(
             url=url, payload={"clientid": client_id, "transref": trans_ref}
         )
         json_content = response.json()
 
         if response.status_code == 200 and json_content["responsecode"] == "0":
-            state = State.SUCCESS
+            state = State.CONFIRMED
         elif response.status_code == 401:
-            raise InvalidCredentialError
+            raise InvalidCredentialsError
         else:
-            state = State.FAILURE
+            state = State.REJECTED
         return state
 
     def _make_moov_payment(self, payload: dict) -> State:
-        url = self.context + self.moov_payment_path
+        url = self.context + MOOV_PAYMENT_PATH
         response = self._send_request(url=url, payload=payload)
         json_content = response.json()
 
         if response.status_code == 202 and json_content["responsecode"] == "0":
-            state = State.SUCCESS
+            state = State.CONFIRMED
         elif response.status_code == 401:
-            raise InvalidCredentialError
+            raise InvalidCredentialsError
         else:
-            state = State.FAILURE
+            state = State.REJECTED
         return state
 
     def guess_client_id(self, phone: str) -> str:

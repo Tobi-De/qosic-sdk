@@ -5,9 +5,8 @@ import time
 from typing import Callable, Union
 
 from .exceptions import (
-    InvalidPhoneNumberError,
+    InvalidPhoneError,
     PollRuntimeError,
-    PollTimeoutError,
     ProviderNotFoundError,
 )
 
@@ -36,7 +35,7 @@ def get_random_string(length: int = 8, allowed_chars: str = RANDOM_STRING_CHARS)
 
 def clean_phone(phone: str):
     if not re.fullmatch(r"(\+?)\d{11}", phone):
-        raise InvalidPhoneNumberError
+        raise InvalidPhoneError
     if "+" in phone:
         return phone[1:]
     return phone
@@ -51,10 +50,8 @@ def poll(
 ):
 
     kwargs = kwargs or dict()
-    values = list()
-
     max_time = time.time() + timeout
-    last_item = None
+
     while True:
         try:
             val = target(**kwargs)
@@ -66,11 +63,8 @@ def poll(
             if check_success(val):
                 return val
 
-        values.append(last_item)
-
         # Check the time after to make sure the poll function is called at least once
         if time.time() >= max_time:
             return last_item
-            # raise PollTimeoutError(values)
 
         time.sleep(step)
