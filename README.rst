@@ -6,10 +6,10 @@ qosic-sdk
 .. image:: https://img.shields.io/pypi/v/qosic.svg
         :target: https://pypi.python.org/pypi/qosic
 
-.. image:: https://img.shields.io/travis/Tobi-De/qosic.svg
-        :target: https://travis-ci.com/Tobi-De/qosic
+.. image:: https://api.travis-ci.com/Tobi-De/qosic-sdk.svg
+        :target: https://travis-ci.com/Tobi-De/qosic-sdk
 
-.. image:: https://readthedocs.org/projects/qosic/badge/?version=latest
+.. image:: https://readthedocs.org/projects/qosic-sdk/badge/?version=latest
         :target: https://qosic-sdk.readthedocs.io/en/latest/?version=latest
         :alt: Documentation Status
 
@@ -21,7 +21,7 @@ money payments for businesses in Africa.
 
 
 * Free software: MIT license
-* Documentation: https://qosic.readthedocs.io.
+* Documentation: https://qosic-sdk.readthedocs.io.
 
 Supported Python versions
 -------------------------
