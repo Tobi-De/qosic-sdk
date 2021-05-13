@@ -39,8 +39,8 @@ setup(
     license="MIT license",
     long_description=readme + "\n\n" + history,
     include_package_data=True,
-    keywords="qosic",
-    name="qosic",
+    keywords="qosic-sdk",
+    name="qosic-sdk",
     packages=find_packages(
         include=["qosic-sdk", "qosic", "qosic.*", "qosic-sdk.*", "qos"]
     ),
