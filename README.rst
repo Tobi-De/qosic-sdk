@@ -3,7 +3,7 @@ qosic-sdk
 =========
 
 
-.. image:: https://img.shields.io/pypi/v/qosic.svg
+.. image:: https://img.shields.io/pypi/v/qosic-sdk.svg
         :target: https://pypi.python.org/pypi/qosic-sdk
 
 .. image:: https://api.travis-ci.com/Tobi-De/qosic-sdk.svg
