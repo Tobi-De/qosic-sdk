@@ -4,7 +4,7 @@ qosic-sdk
 
 
 .. image:: https://img.shields.io/pypi/v/qosic.svg
-        :target: https://pypi.python.org/pypi/qosic-sdk
+        :target: https://pypi.python.org/pypi/qosic
 
 .. image:: https://api.travis-ci.com/Tobi-De/qosic-sdk.svg
         :target: https://travis-ci.com/Tobi-De/qosic-sdk
@@ -55,7 +55,7 @@ For those of you in a hurry, here's a sample code to get you started.
 
 .. code-block:: console
 
-    pip install qosic-sdk
+    pip install qosic
 
 .. code-block:: python3
 
