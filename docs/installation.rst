@@ -12,7 +12,7 @@ To install qosic-sdk, run this command in your terminal:
 
 .. code-block:: console
 
-    $ pip install qosic
+    $ pip install qosic-sdk
 
 This is the preferred method to install qosic-sdk, as it will always install the most recent stable release.
 
