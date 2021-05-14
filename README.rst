@@ -38,14 +38,14 @@ Features
 
 - Simple synchronous client to make your payment requests
 - Clean and meaningful exceptions
+- 100 % test coverage
+- Configurable timeouts
+- Enable Logging for debug purpose
 
 TODOS
 -----
 
-- Async Client for payment requests
-- Configurable timeouts
-- Enable Debug Logging
-- 100 % test coverage
+- Async Client
 
 
 Quickstart
@@ -53,7 +53,7 @@ Quickstart
 
 For those of you in a hurry, here's a sample code to get you started.
 
-.. code-block:: console
+.. code-block:: shell
 
     pip install qosic-sdk
 
