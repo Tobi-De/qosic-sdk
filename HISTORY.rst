@@ -7,7 +7,7 @@ History
 
 * First release on PyPI.
 
-1.0.1 (2021-05-13)
+1.0.1 (2021-05-14)
 ------------------
 
 * Write some tests.
