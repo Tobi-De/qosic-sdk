@@ -18,6 +18,8 @@ setup_requirements = [
 
 test_requirements = [
     "pytest>=3",
+    "pydantic>=1.8.2",
+    "pytest-httpx>=0.12.0"
 ]
 
 setup(

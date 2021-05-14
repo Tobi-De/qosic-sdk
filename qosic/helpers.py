@@ -18,6 +18,19 @@ from .models import Provider
 logging.basicConfig(level=logging.DEBUG, format="%(message)s")
 
 
+def get_json_response(response: Response) -> dict:
+    default = {"responsecode": None}
+    try:
+        json_content = response.json()
+    except json.decoder.JSONDecodeError:
+        return default
+    else:
+        json_content = (
+            json_content if json_content and isinstance(json_content, dict) else default
+        )
+        return json_content
+
+
 def log_request(request: Request):
     json_content = json.loads(request.content)
     logging.debug(

@@ -53,4 +53,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    #main()
+    from qosic.models import Provider
+    p = Provider(client_id="99", allowed_prefixes=["98"])
+    print(p)

@@ -3,7 +3,7 @@ import json.decoder
 from typing import List
 
 import httpx
-from pydantic import BaseModel, HttpUrl, PrivateAttr, validate_arguments, constr
+from pydantic import BaseModel, HttpUrl, PrivateAttr, validate_arguments, constr, conint
 
 from .exceptions import (
     UserAccountNotFound,
@@ -12,7 +12,14 @@ from .exceptions import (
     ServerError,
     InvalidClientIdError,
 )
-from .helpers import clean_phone, guess_provider, poll, log_request, log_response
+from .helpers import (
+    clean_phone,
+    guess_provider,
+    poll,
+    log_request,
+    log_response,
+    get_json_response,
+)
 from .models import (
     Provider,
     Result,
@@ -58,7 +65,7 @@ class Client(BaseModel):
     def request_payment(
         self,
         phone: constr(regex=r"(\+?)\d{11}", strip_whitespace=True),
-        amount: int,
+        amount: conint(gt=0),
         first_name: str = None,
         last_name: str = None,
     ) -> Result:
@@ -112,24 +119,18 @@ class Client(BaseModel):
     def _send_request(self, url: HttpUrl, payload: dict) -> httpx.Response:
         try:
             response = self._http_client.post(url, json=payload)
-        except json.decoder.JSONDecodeError:
-            raise RequestError(f"The was an issue with your url: {url}")
-        except httpx.RequestError as exc:
-            raise RequestError(
-                f"An error occurred while requesting {repr(exc.request.url)}."
-            )
+        except (json.decoder.JSONDecodeError, httpx.RequestError):
+            raise RequestError(f"An error occurred while requesting {url}.")
         else:
             if httpx.codes.is_server_error(value=response.status_code):
                 raise ServerError(
                     f"The qos server seems to fail for some reason, you can set your"
-                    f" client active_logging to true for more details and try again."
+                    f" client active_logging to true for more details, check your client auth "
+                    f" informations, providers ClientID and try again."
                 )
             elif response.status_code == httpx.codes.UNAUTHORIZED:
                 raise InvalidCredentialsError("Your client credentials are invalid")
-            elif response.status_code in [
-                httpx.codes.NOT_FOUND,
-                httpx.codes.GATEWAY_TIMEOUT,
-            ]:
+            elif response.status_code == httpx.codes.NOT_FOUND:
                 raise InvalidClientIdError(
                     f"Your client Id is invalid : {payload['clientid']}"
                 )
@@ -158,7 +159,8 @@ class Client(BaseModel):
         response = self._send_request(
             url=url, payload={"clientid": provider.client_id, "transref": trans_ref}
         )
-        json_content = response.json()
+
+        json_content = get_json_response(response)
 
         if (
             response.status_code == httpx.codes.OK
@@ -177,7 +179,8 @@ class Client(BaseModel):
     def _make_moov_payment(self, payload: dict, provider: MOOV) -> Result.State:
         url = self.context + provider.payment_path
         response = self._send_request(url=url, payload=payload)
-        json_content = response.json()
+
+        json_content = get_json_response(response)
 
         if (
             response.status_code == httpx.codes.OK
