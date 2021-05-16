@@ -2,7 +2,13 @@ import pytest
 from pydantic import ValidationError
 
 from qosic.constants import MTN_PREFIXES
-from qosic.models import Provider, MtnConfig
+from qosic.models import (
+    Provider,
+    MtnConfig,
+    OPERATION_CONFIRMED,
+    OPERATION_REJECTED,
+    Result,
+)
 from qosic.utils import get_random_string
 
 
@@ -54,3 +60,12 @@ def test_mtn_config():
 
     with pytest.raises(ValidationError):
         MtnConfig(step=30, timeout=500, max_tries=6)
+
+
+def test_result():
+    result = Result(
+        state=OPERATION_CONFIRMED,
+        trans_ref=get_random_string(),
+        client_id=get_random_string(),
+    )
+    assert result.state == OPERATION_CONFIRMED

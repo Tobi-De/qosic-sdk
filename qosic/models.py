@@ -46,8 +46,8 @@ class Provider(BaseModel, ABC):
 
 
 class MtnConfig(BaseModel):
-    step: conint(ge=30, le=60) = 60
-    timeout: conint(ge=60, le=60 * 5) = 60 * 5
+    step: conint(ge=30, le=90) = 60
+    timeout: conint(ge=60, le=60 * 5) = 60 * 2
     max_tries: Optional[int]
 
     @root_validator
@@ -57,6 +57,9 @@ class MtnConfig(BaseModel):
             assert (
                 max_tries * step <= timeout
             ), f"max_tries exceed timeout: {max_tries} * {step} > {timeout}"
+        assert (
+            step < timeout
+        ), f"Your step must be inferior to your timeout: {step} >= {timeout}"
         return data
 
 
