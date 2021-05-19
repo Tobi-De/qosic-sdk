@@ -19,7 +19,7 @@ History
 * Change timeout defaults.
 * Update docs.
 
-1.0.2 (2021-05-19)
+1.1.0 (2021-05-19)
 ------------------
 
 * Change MtnConfig step default and minimal value.
