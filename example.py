@@ -48,12 +48,10 @@ def main():
             )
         else:
             print(f"Payment rejected: {result}")
+        print(client.collected_responses)
         # If you need to make a refund : (remember that refund are only available for MTN phone number right now)
         # result = client.request_refund(trans_ref=result.trans_ref, phone=phone)
 
 
 if __name__ == "__main__":
-    #main()
-    from qosic.models import Provider
-    p = Provider(client_id="99", allowed_prefixes=["98"])
-    print(p)
+    main()

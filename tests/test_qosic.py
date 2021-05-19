@@ -143,16 +143,18 @@ def test_request_payment_moov_rejected(client: Client, httpx_mock: HTTPXMock):
 
 
 def test_send_request(client: Client, httpx_mock: HTTPXMock):
-    fake_url = "https://fakeurl.com"
+    fake_path = "/fakepath"
     with pytest.raises(RequestError):
-        client._send_request(url=fake_url + MTN_PAYMENT_PATH, payload={})
+        client._send_request(path=fake_path, payload={})
 
     real_url = client.context + MTN_PAYMENT_PATH
     httpx_mock.add_response(url=real_url, status_code=httpx.codes.UNAUTHORIZED)
     with pytest.raises(InvalidCredentialsError):
-        client._send_request(url=real_url, payload={})
+        client._send_request(path=MTN_PAYMENT_PATH, payload={})
 
     real_url2 = client.context + MTN_PAYMENT_STATUS_PATH
     httpx_mock.add_response(url=real_url2, status_code=httpx.codes.NOT_FOUND)
     with pytest.raises(InvalidClientIdError):
-        client._send_request(url=real_url2, payload={"clientid": get_random_string()})
+        client._send_request(
+            path=MTN_PAYMENT_STATUS_PATH, payload={"clientid": get_random_string()}
+        )

@@ -24,8 +24,3 @@ class InvalidClientIdError(Exception):
 
 class InvalidCredentialsError(Exception):
     pass
-
-
-class PollRuntimeError(Exception):
-    """Exception raised if polling function fails. Polling is used in the case
-    of an MTN payment requets to get the status of the payment"""

@@ -46,20 +46,106 @@ class Client(BaseModel):
     context: HttpUrl = "https://qosic.net:8443"
     active_logging: bool = False
     _http_client: httpx.Client = PrivateAttr()
+    _collected_responses: List[httpx.Response] = PrivateAttr()
 
     def __init__(self, **data):
         super().__init__(**data)
         self._http_client = httpx.Client(
+            base_url=self.context,
             auth=(self.login, self.password),
             headers={"content-type": "application/json"},
             verify=False,
             timeout=80,
         )
+        self._collected_responses = list()
         if self.active_logging:
             self._http_client.event_hooks = {
                 "request": [log_request],
-                "response": [log_response],
+                "response": [log_response, self._update_responses],
             }
+
+    @property
+    def collected_responses(self):
+        return self._collected_responses
+
+    def _update_responses(self, r: httpx.Response):
+        self._collected_responses.append(r)
+
+    @validate_arguments
+    def _send_request(self, path: str, payload: dict) -> httpx.Response:
+        try:
+            response = self._http_client.post(path, json=payload)
+        except (json.decoder.JSONDecodeError, httpx.RequestError):
+            raise RequestError(
+                f"An error occurred while requesting {self.context + path}."
+            )
+        else:
+            if httpx.codes.is_server_error(value=response.status_code):
+                raise ServerError(
+                    f"The qos server seems to fail for some reason, you can set your"
+                    f" client active_logging to true for more details, check your client auth "
+                    f" informations, providers ClientID and try again."
+                )
+            elif response.status_code == httpx.codes.UNAUTHORIZED:
+                raise InvalidCredentialsError("Your client credentials are invalid")
+            elif response.status_code == httpx.codes.NOT_FOUND:
+                raise InvalidClientIdError(
+                    f"Your client Id is invalid : {payload['clientid']}"
+                )
+        return response
+
+    def _make_mtn_payment(self, payload: dict, provider: MTN) -> Result.State:
+        response = self._send_request(path=provider.payment_path, payload=payload)
+
+        if response.status_code == httpx.codes.ACCEPTED:
+            config = provider.config if provider.config else MtnConfig()
+            state = poll(
+                target=self._fetch_transaction_status,
+                kwargs={
+                    "trans_ref": payload["transref"],
+                    "provider": provider,
+                },
+                **config.dict(),
+            )
+        else:
+            state = OPERATION_REJECTED
+        return state
+
+    def _fetch_transaction_status(self, trans_ref: str, provider: MTN) -> Result.State:
+        response = self._send_request(
+            path=provider.payment_status_path,
+            payload={"clientid": provider.client_id, "transref": trans_ref},
+        )
+
+        json_content = get_json_response(response)
+
+        if (
+            response.status_code == httpx.codes.OK
+            and json_content["responsecode"] == "00"
+        ):
+            state = OPERATION_CONFIRMED
+        elif response.status_code == httpx.codes.EXPECTATION_FAILED:
+            raise UserAccountNotFound(
+                f"A mobile money account was not found for the given"
+                f" phone - transref {trans_ref}"
+            )
+        else:
+            state = OPERATION_REJECTED
+        return state
+
+    def _make_moov_payment(self, payload: dict, provider: MOOV) -> Result.State:
+        response = self._send_request(path=provider.payment_path, payload=payload)
+
+        json_content = get_json_response(response)
+
+        if (
+            response.status_code == httpx.codes.OK
+            and json_content["responsecode"] == "0"
+        ):
+            state = OPERATION_CONFIRMED
+        else:
+            state = OPERATION_REJECTED
+        return state
 
     @validate_arguments
     def request_payment(
@@ -104,9 +190,9 @@ class Client(BaseModel):
         provider = guess_provider(phone=phone, providers=self.providers)
         assert isinstance(provider, MTN), "Refund are available only MTN phone numbers"
 
-        url = self.context + provider.refund_path
         response = self._send_request(
-            url=url, payload={"clientid": provider.client_id, "transref": trans_ref}
+            path=provider.refund_path,
+            payload={"clientid": provider.client_id, "transref": trans_ref},
         )
 
         if response.status_code == httpx.codes.OK:
@@ -114,82 +200,6 @@ class Client(BaseModel):
         else:
             state = OPERATION_REJECTED
         return Result(client_id=provider.client_id, trans_ref=trans_ref, state=state)
-
-    @validate_arguments
-    def _send_request(self, url: HttpUrl, payload: dict) -> httpx.Response:
-        try:
-            response = self._http_client.post(url, json=payload)
-        except (json.decoder.JSONDecodeError, httpx.RequestError):
-            raise RequestError(f"An error occurred while requesting {url}.")
-        else:
-            if httpx.codes.is_server_error(value=response.status_code):
-                raise ServerError(
-                    f"The qos server seems to fail for some reason, you can set your"
-                    f" client active_logging to true for more details, check your client auth "
-                    f" informations, providers ClientID and try again."
-                )
-            elif response.status_code == httpx.codes.UNAUTHORIZED:
-                raise InvalidCredentialsError("Your client credentials are invalid")
-            elif response.status_code == httpx.codes.NOT_FOUND:
-                raise InvalidClientIdError(
-                    f"Your client Id is invalid : {payload['clientid']}"
-                )
-        return response
-
-    def _make_mtn_payment(self, payload: dict, provider: MTN) -> Result.State:
-        url = self.context + provider.payment_path
-        response = self._send_request(url=url, payload=payload)
-
-        if response.status_code == httpx.codes.ACCEPTED:
-            config = provider.config if provider.config else MtnConfig()
-            state = poll(
-                target=self._fetch_transaction_status,
-                kwargs={
-                    "trans_ref": payload["transref"],
-                    "provider": provider,
-                },
-                **config.dict(),
-            )
-        else:
-            state = OPERATION_REJECTED
-        return state
-
-    def _fetch_transaction_status(self, trans_ref: str, provider: MTN) -> Result.State:
-        url = self.context + provider.payment_status_path
-        response = self._send_request(
-            url=url, payload={"clientid": provider.client_id, "transref": trans_ref}
-        )
-
-        json_content = get_json_response(response)
-
-        if (
-            response.status_code == httpx.codes.OK
-            and json_content["responsecode"] == "00"
-        ):
-            state = OPERATION_CONFIRMED
-        elif response.status_code == httpx.codes.EXPECTATION_FAILED:
-            raise UserAccountNotFound(
-                f"A mobile money account was not found for the given"
-                f" phone - transref {trans_ref}"
-            )
-        else:
-            state = OPERATION_REJECTED
-        return state
-
-    def _make_moov_payment(self, payload: dict, provider: MOOV) -> Result.State:
-        url = self.context + provider.payment_path
-        response = self._send_request(url=url, payload=payload)
-
-        json_content = get_json_response(response)
-
-        if (
-            response.status_code == httpx.codes.OK
-            and json_content["responsecode"] == "0"
-        ):
-            state = OPERATION_CONFIRMED
-        else:
-            state = OPERATION_REJECTED
-        return state
 
     def __del__(self):
         self._http_client.close()

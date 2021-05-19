@@ -46,7 +46,7 @@ class Provider(BaseModel, ABC):
 
 
 class MtnConfig(BaseModel):
-    step: conint(ge=30, le=90) = 60
+    step: conint(ge=10, le=90) = 30
     timeout: conint(ge=60, le=60 * 5) = 60 * 2
     max_tries: Optional[int]
 

@@ -11,7 +11,6 @@ from httpx import Response, Request
 from .exceptions import (
     InvalidPhoneError,
     ProviderNotFoundError,
-    PollRuntimeError,
 )
 from .models import Provider
 
@@ -80,15 +79,11 @@ def poll(
     max_time = time.time() + timeout
     tries = 0
     while True:
-        try:
-            val = target(**kwargs)
-            last_item = val
-        except Exception as e:
-            raise PollRuntimeError(f"poll() catch an exception: {e}")
-        else:
-            # Condition passes, this is the only "successful" exit from the polling function
-            if check_success(val):
-                return val
+        val = target(**kwargs)
+        last_item = val
+        # Condition passes, this is the only "successful" exit from the polling function
+        if check_success(val):
+            return val
 
         tries += 1
 

@@ -18,3 +18,12 @@ History
 
 * Change timeout defaults.
 * Update docs.
+
+1.0.2 (2021-05-19)
+------------------
+
+* Change MtnConfig step default and minimal value.
+* Add exception list to the docs.
+* Remove PollRuntimeError, now the poll function fails while raising the right exception.
+* When active_logging is set to True, the client now collect responses in the client property *collected_responses*.
+

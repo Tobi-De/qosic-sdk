@@ -109,6 +109,7 @@ For those of you in a hurry, here's a sample code to get you started.
                 )
             else:
                 print(f"Payment rejected: {result}")
+            print(client.collected_responses)
             # If you need to make a refund : (remember that refund are only available for MTN phone number right now)
             # result = client.request_refund(trans_ref=result.trans_ref, phone=phone)
 

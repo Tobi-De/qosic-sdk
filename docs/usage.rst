@@ -15,7 +15,7 @@ Usage
     moov_client_id = os.getenv("MTN_CLIENT_ID")
     server_login = os.getenv("SERVER_LOGIN")
     server_pass = os.getenv("SERVER_PASS")
-    
+
 
     providers = [MTN(client_id=mtn_client_id),MOOV(client_id=moov_client_id)]
 
@@ -97,7 +97,7 @@ Refund are only available for MTN phone numbers for now.
 
     if result.state:
         print("successful refund")
-    
+
 
 These are the available keyword arguments:
 
@@ -132,7 +132,7 @@ MTN
 ---
 
 .. code-block:: python
-    
+
     import os
     from qosic import MTN, MtnConfig
 
@@ -157,10 +157,10 @@ These are the available keyword arguments:
 
 - *step* : int ( between 30 and 90) = 60 (the default)
 
-Defines the amount of time to wait (in seconds) before each poll to get the transaction status. This value 
+Defines the amount of time to wait (in seconds) before each poll to get the transaction status. This value
 must be inferior to the timeout value.
 
-- *timeout* : int ( between 60 and 300 ) = 120 
+- *timeout* : int ( between 60 and 300 ) = 120
 
 The poll will be executed until the time elapsed is greater than the maximum timeout (in seconds).
 
@@ -169,7 +169,7 @@ The poll will be executed until the time elapsed is greater than the maximum tim
 Maximum number of times the fetch function will run. This values validate this condition:
 
 .. code-block:: console
-        
+
     max_tries * step <= timeout
 
 
@@ -183,7 +183,7 @@ MOOV
 ----
 
 .. code-block:: python
-    
+
     import os
     from qosic import MOOV
 
@@ -203,6 +203,21 @@ Your client ID.
 
 The list of the phone number valid prefixes for this provider. The default value should be good enough, you will probably
 never need to change it.
+
+
+5. Exceptions
+-------------
+
+Here is all the exceptions available :
+
+- *ServerError* : raised when the qos server is busy or fails for some reason.
+- *UserAccountNotFound* : raised when the phone number provided does not have a mobile money account.
+- *ProviderNotFoundError* : raised when for the given phone number, the provider can't be identified.
+- *InvalidPhoneError* : raised when the phone number does not match the valid format.
+- *InvalidClientIdError* : raised when the client ID does not match the provider or is incorrect.
+- *InvalidCredentialsError* : raised when your api credentials are invalid.
+- *RequestError*: raised when the internal http client failed to make a request, check your logs and if there
+is no obvious solution to your problem, open an issue on this repository.
 
 
 
