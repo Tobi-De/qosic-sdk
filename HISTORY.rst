@@ -31,3 +31,10 @@ History
 ------------------
 
 * Update MTN and MOOV prefixes
+
+
+1.1.2 (2021-05-20)
+------------------
+
+* Add more prefixes to MTN and MOOV prefixes
+* Update docs

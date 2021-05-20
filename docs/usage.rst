@@ -82,7 +82,8 @@ The subscriber last name.
 3. Refunding a payment
 ----------------------
 
-Refund are only available for MTN phone numbers for now.
+Refund are only available for MTN phone numbers for now. If you try a refund with a MOOV phone number, an
+*AssertionError* will be raised.
 
 .. code-block:: python
 
@@ -128,8 +129,7 @@ The phone number used. Example : 229XXXXXXXX
 There are only two suppored providers for now, MTN and MOOV, and two
 corresponding classes are available for them.
 
-MTN
----
+**MTN**
 
 .. code-block:: python
 
@@ -179,8 +179,7 @@ The list of the phone number valid prefixes for this provider. The default value
 never need to change it.
 
 
-MOOV
-----
+**MOOV**
 
 .. code-block:: python
 
@@ -216,15 +215,10 @@ Here is all the exceptions available :
 - *InvalidPhoneError* : raised when the phone number does not match the valid format.
 - *InvalidClientIdError* : raised when the client ID does not match the provider or is incorrect.
 - *InvalidCredentialsError* : raised when your api credentials are invalid.
-- *RequestError*: raised when the internal http client failed to make a request, check your logs and if there
-is no obvious solution to your problem, open an issue on this repository.
-
-
-
-
-
+- *RequestError*: raised when the internal http client failed to make a request, check your logs and if there is no obvious solution to your problem, `open an issue`_ on the repository.
 
 
 
 
 .. _Qosic: https://www.qosic.com/docs/
+.. _`open an issue`: https://github.com/Tobi-De/qosic-sdk/issues/new
