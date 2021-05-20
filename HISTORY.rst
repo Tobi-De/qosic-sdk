@@ -27,3 +27,7 @@ History
 * Remove PollRuntimeError, now the poll function fails while raising the right exception.
 * When active_logging is set to True, the client now collect responses in the client property *collected_responses*.
 
+1.1.1 (2021-05-20)
+------------------
+
+* Update MTN and MOOV prefixes
