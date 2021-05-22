@@ -38,3 +38,10 @@ History
 
 * Add more prefixes to MTN and MOOV prefixes
 * Update docs
+
+1.1.3 (2021-05-22)
+------------------
+
+* Add more prefixes to MTN and MOOV prefixes
+* Update docs
+
