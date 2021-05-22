@@ -2,22 +2,25 @@
 History
 =======
 
-1.0.0 (2021-05-13)
+
+1.1.3 (2021-05-22)
 ------------------
 
-* First release on PyPI.
+* add support for context manager to the Client class
 
-1.0.1 (2021-05-14)
+
+1.1.2 (2021-05-20)
 ------------------
 
-* Write some tests.
-* The internal http client handles non-json responses better.
+* Add more prefixes to MTN and MOOV prefixes
+* Update docs
 
-1.0.2 (2021-05-16)
+
+1.1.1 (2021-05-20)
 ------------------
 
-* Change timeout defaults.
-* Update docs.
+* Update MTN and MOOV prefixes
+
 
 1.1.0 (2021-05-19)
 ------------------
@@ -27,21 +30,23 @@ History
 * Remove PollRuntimeError, now the poll function fails while raising the right exception.
 * When active_logging is set to True, the client now collect responses in the client property *collected_responses*.
 
-1.1.1 (2021-05-20)
+
+1.0.2 (2021-05-16)
 ------------------
 
-* Update MTN and MOOV prefixes
+* Change timeout defaults.
+*Update docs.
 
 
-1.1.2 (2021-05-20)
+1.0.1 (2021-05-14)
 ------------------
 
-* Add more prefixes to MTN and MOOV prefixes
-* Update docs
+* Write some tests.
+* The internal http client handles non-json responses better.
 
-1.1.3 (2021-05-22)
+
+1.0.0 (2021-05-13)
 ------------------
 
-* Add more prefixes to MTN and MOOV prefixes
-* Update docs
+* First release on PyPI.
 
