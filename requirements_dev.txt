@@ -14,4 +14,4 @@ pydantic==1.8.2
 
 pytest==6.2.5
 pytest-runner==5.3.1
-pytest-httpx==0.12.0
+pytest-httpx==0.13.0
