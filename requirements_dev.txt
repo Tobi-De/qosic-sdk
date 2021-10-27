@@ -10,6 +10,7 @@ twine==3.4.2
 httpx==0.19.0
 python-dotenv==0.19.0
 pydantic==1.8.2
+phonenumbers==8.12.35
 
 
 pytest==6.2.5

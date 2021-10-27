@@ -2,6 +2,11 @@
 History
 =======
 
+2.0.0 (2021-10-27)
+------------------
+
+* Now using polling2 and the phonenumbers python packages
+
 
 1.1.3 (2021-05-22)
 ------------------
