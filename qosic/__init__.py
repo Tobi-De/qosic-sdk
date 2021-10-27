@@ -6,6 +6,7 @@ from .models import (  # noqa
     MOOV,
     OPERATION_CONFIRMED,
     OPERATION_REJECTED,
+    get_random_string
 )
 
 __author__ = """Tobi DEGNON"""

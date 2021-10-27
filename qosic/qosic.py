@@ -3,7 +3,9 @@ import json.decoder
 from typing import List
 
 import httpx
-from pydantic import BaseModel, HttpUrl, PrivateAttr, validate_arguments, constr, conint
+import polling2
+from phonenumbers import PhoneNumber
+from pydantic import BaseModel, HttpUrl, PrivateAttr, validate_arguments, conint
 
 from .exceptions import (
     UserAccountNotFound,
@@ -13,11 +15,7 @@ from .exceptions import (
     InvalidClientIdError,
 )
 from .helpers import (
-    clean_phone,
     guess_provider,
-    poll,
-    log_request,
-    log_response,
     get_json_response,
 )
 from .models import (
@@ -37,16 +35,13 @@ class Client(BaseModel):
     :param login: Your server authentication login/user.
     :param password: Your server authentication password.
     :param context: The QosIC server root domain if you ever need to change it.
-    :param active_logging: if set to True, the client will log every request and response
     """
 
     providers: List[Provider]
     login: str
     password: str
     context: HttpUrl = "https://qosic.net:8443"
-    active_logging: bool = False
     _http_client: httpx.Client = PrivateAttr()
-    _collected_responses: List[httpx.Response] = PrivateAttr()
 
     def __init__(self, **data):
         super().__init__(**data)
@@ -57,19 +52,6 @@ class Client(BaseModel):
             verify=False,
             timeout=80,
         )
-        self._collected_responses = list()
-        if self.active_logging:
-            self._http_client.event_hooks = {
-                "request": [log_request],
-                "response": [log_response, self._update_responses],
-            }
-
-    @property
-    def collected_responses(self):
-        return self._collected_responses
-
-    def _update_responses(self, r: httpx.Response):
-        self._collected_responses.append(r)
 
     @validate_arguments
     def _send_request(self, path: str, payload: dict) -> httpx.Response:
@@ -80,6 +62,8 @@ class Client(BaseModel):
                 f"An error occurred while requesting {self.context + path}."
             )
         else:
+            print(payload)
+            print(response)
             if httpx.codes.is_server_error(value=response.status_code):
                 raise ServerError(
                     f"The qos server seems to fail for some reason, you can set your"
@@ -92,6 +76,10 @@ class Client(BaseModel):
                 raise InvalidClientIdError(
                     f"Your client Id is invalid : {payload['clientid']}"
                 )
+            elif response.status_code == httpx.codes.EXPECTATION_FAILED:
+                raise UserAccountNotFound(
+                    "A mobile money account was not found for the given phone number"
+                )
         return response
 
     def _make_mtn_payment(self, payload: dict, provider: MTN) -> Result.State:
@@ -99,14 +87,18 @@ class Client(BaseModel):
 
         if response.status_code == httpx.codes.ACCEPTED:
             config = provider.config if provider.config else MtnConfig()
-            state = poll(
-                target=self._fetch_transaction_status,
-                kwargs={
-                    "trans_ref": payload["transref"],
-                    "provider": provider,
-                },
-                **config.dict(),
-            )
+            try:
+                state = polling2.poll(
+                    target=self._fetch_transaction_status,
+                    check_success=polling2.is_value(OPERATION_CONFIRMED),
+                    kwargs={
+                        "trans_ref": payload["transref"],
+                        "provider": provider,
+                    },
+                    **config.dict(),
+                )
+            except polling2.TimeoutException:
+                state = OPERATION_REJECTED
         else:
             state = OPERATION_REJECTED
         return state
@@ -124,11 +116,6 @@ class Client(BaseModel):
             and json_content["responsecode"] == "00"
         ):
             state = OPERATION_CONFIRMED
-        elif response.status_code == httpx.codes.EXPECTATION_FAILED:
-            raise UserAccountNotFound(
-                f"A mobile money account was not found for the given"
-                f" phone - transref {trans_ref}"
-            )
         else:
             state = OPERATION_REJECTED
         return state
@@ -147,10 +134,10 @@ class Client(BaseModel):
             state = OPERATION_REJECTED
         return state
 
-    @validate_arguments
+    @validate_arguments(config={"arbitrary_types_allowed": True})
     def request_payment(
         self,
-        phone: constr(regex=r"(\+?)\d{11}", strip_whitespace=True),
+        phone: PhoneNumber,
         amount: conint(gt=0),
         first_name: str = None,
         last_name: str = None,
@@ -158,11 +145,9 @@ class Client(BaseModel):
         provider = guess_provider(phone=phone, providers=self.providers)
         payload = {
             "clientid": provider.client_id,
-            "msisdn": clean_phone(phone),
+            "msisdn": f"229{phone.national_number}",
             "amount": str(amount),
-            "transref": provider.transref_factory(
-                provider_name=self.__class__.__name__
-            ),
+            "transref": provider.transref_factory(),
         }
         if first_name:
             payload["firstname"] = first_name
@@ -183,10 +168,8 @@ class Client(BaseModel):
             amount=str(amount),
         )
 
-    @validate_arguments
-    def request_refund(
-        self, trans_ref: str, phone: constr(regex=r"(\+?)\d{11}", strip_whitespace=True)
-    ) -> Result:
+    @validate_arguments(config={"arbitrary_types_allowed": True})
+    def request_refund(self, trans_ref: str, phone: PhoneNumber) -> Result:
         provider = guess_provider(phone=phone, providers=self.providers)
         assert isinstance(provider, MTN), "Refund are available only MTN phone numbers"
 

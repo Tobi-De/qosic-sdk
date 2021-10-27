@@ -56,10 +56,15 @@ If set to true, the client will log each request and response.
 
 These are the available keyword arguments:
 
-**phone**: str
+**phone**: PhoneNumber
 
+This use the PhoneNumber class from the phonenumbers package. For example you can do this:
 
-The phone number used. Example : 229XXXXXXXX
+.. code-block:: python
+
+    import phonenumbers
+    phone = phonenumbers.parse("+22991617451")
+
 
 **amount**: int
 

@@ -1,53 +1,44 @@
 import pytest
 from pydantic import ValidationError
 
+from qosic import get_random_string
 from qosic.constants import MTN_PREFIXES
 from qosic.models import (
     Provider,
     MtnConfig,
     OPERATION_CONFIRMED,
-    OPERATION_REJECTED,
     Result,
 )
-from qosic.utils import get_random_string
 
 
 def test_provider():
     def bad_random_string_generator():
         return None
 
-    def bad_random_string_generator2():
-        return get_random_string()
-
-    def bad_random_string_generator3():
+    def bad_random_string_generator1():
         return get_random_string(length=3)
 
-    def bad_random_string_generator4():
+    def bad_random_string_generator2():
         return get_random_string(length=18)
 
+    client_id = "fake client id"
     with pytest.raises(ValidationError):
         Provider(
-            client_id="jean pierre",
+            client_id=client_id,
             allowed_prefixes=MTN_PREFIXES,
             transref_factory=bad_random_string_generator,
         )
     with pytest.raises(ValidationError):
         Provider(
-            client_id="jean pierre",
+            client_id=client_id,
+            allowed_prefixes=MTN_PREFIXES,
+            transref_factory=bad_random_string_generator1,
+        )
+    with pytest.raises(ValidationError):
+        Provider(
+            client_id=client_id,
             allowed_prefixes=MTN_PREFIXES,
             transref_factory=bad_random_string_generator2,
-        )
-    with pytest.raises(ValidationError):
-        Provider(
-            client_id="jean pierre",
-            allowed_prefixes=MTN_PREFIXES,
-            transref_factory=bad_random_string_generator3,
-        )
-    with pytest.raises(ValidationError):
-        Provider(
-            client_id="jean pierre",
-            allowed_prefixes=MTN_PREFIXES,
-            transref_factory=bad_random_string_generator4,
         )
 
 

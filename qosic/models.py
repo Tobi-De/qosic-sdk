@@ -1,5 +1,7 @@
+import secrets
 from abc import ABC
 from enum import Enum
+from string import ascii_letters, digits
 from typing import Optional, List, Callable
 
 from pydantic import BaseModel, root_validator, conint, PrivateAttr, validator
@@ -12,7 +14,15 @@ from .constants import (
     MOOV_PAYMENT_PATH,
     REFUND_PATH,
 )
-from .utils import get_random_string, is_allowed_string
+
+ALLOWED_STRING_CHARS = ascii_letters + digits
+
+
+def get_random_string(
+    length: int = 12,
+    allowed_chars: str = ALLOWED_STRING_CHARS,
+) -> str:
+    return "".join(secrets.choice(allowed_chars) for _ in range(length))
 
 
 class Provider(BaseModel, ABC):
@@ -35,11 +45,8 @@ class Provider(BaseModel, ABC):
 
     @validator("transref_factory")
     def valid_ref_factory(cls, func):
-        ref = func(provider_name=cls.__name__)
+        ref = func()
         assert isinstance(ref, str), "Your factory function should return strings"
-        assert is_allowed_string(
-            ref
-        ), "Your factory function generate strings with unallowed characters"
         assert len(ref) > 6, "Your factory function generate too short strings"
         assert len(ref) <= 16, "Your factory function generate too long strings"
         return func

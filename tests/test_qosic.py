@@ -5,7 +5,7 @@
 import httpx
 import pytest
 from pytest_httpx import HTTPXMock
-
+import phonenumbers
 from qosic import Client, MOOV, MTN, MtnConfig, OPERATION_REJECTED, OPERATION_CONFIRMED
 from qosic.constants import (
     REFUND_PATH,
@@ -19,7 +19,10 @@ from qosic.exceptions import (
     ServerError,
     RequestError,
 )
-from qosic.utils import get_random_string
+from qosic import get_random_string
+
+MTN_PHONE_NUMBER = phonenumbers.parse("+22991617451")
+MOOV_PHONE_NUMBER = phonenumbers.parse("+22963588213")
 
 
 @pytest.fixture
@@ -38,20 +41,20 @@ def client():
 def test_request_refund_ok_response(client: Client, httpx_mock: HTTPXMock):
     url = client.context + REFUND_PATH
     httpx_mock.add_response(url=url, method="POST", status_code=httpx.codes.OK)
-    result = client.request_refund(trans_ref=get_random_string(), phone="22991617451")
+    result = client.request_refund(trans_ref=get_random_string(), phone=MTN_PHONE_NUMBER)
     assert result.state == OPERATION_CONFIRMED
 
 
 def test_request_refund_rejected(client: Client, httpx_mock: HTTPXMock):
     url = client.context + REFUND_PATH
     httpx_mock.add_response(url=url, method="POST", status_code=httpx.codes.BAD_REQUEST)
-    result = client.request_refund(trans_ref=get_random_string(), phone="22991617451")
+    result = client.request_refund(trans_ref=get_random_string(), phone=MTN_PHONE_NUMBER)
     assert result.state == OPERATION_REJECTED
 
 
 def test_request_refund_bad_provider(client: Client, httpx_mock: HTTPXMock):
     with pytest.raises(AssertionError):
-        client.request_refund(trans_ref=get_random_string(), phone="22963588213")
+        client.request_refund(trans_ref=get_random_string(), phone=MOOV_PHONE_NUMBER)
 
 
 def test_request_refund_unauthorized_response(client: Client, httpx_mock: HTTPXMock):
@@ -60,14 +63,14 @@ def test_request_refund_unauthorized_response(client: Client, httpx_mock: HTTPXM
         url=url, method="POST", status_code=httpx.codes.UNAUTHORIZED
     )
     with pytest.raises(InvalidCredentialsError):
-        client.request_refund(trans_ref=get_random_string(), phone="22991617451")
+        client.request_refund(trans_ref=get_random_string(), phone=MTN_PHONE_NUMBER)
 
 
 def test_request_refund_not_found_response(client: Client, httpx_mock: HTTPXMock):
     url = client.context + REFUND_PATH
     httpx_mock.add_response(url=url, method="POST", status_code=httpx.codes.NOT_FOUND)
     with pytest.raises(InvalidClientIdError):
-        client.request_refund(trans_ref=get_random_string(), phone="22991617451")
+        client.request_refund(trans_ref=get_random_string(), phone=MTN_PHONE_NUMBER)
 
 
 def test_request_refund_gateway_timeout_response(client: Client, httpx_mock: HTTPXMock):
@@ -76,7 +79,7 @@ def test_request_refund_gateway_timeout_response(client: Client, httpx_mock: HTT
         url=url, method="POST", status_code=httpx.codes.GATEWAY_TIMEOUT
     )
     with pytest.raises(ServerError):
-        client.request_refund(trans_ref=get_random_string(), phone="22991617451")
+        client.request_refund(trans_ref=get_random_string(), phone=MTN_PHONE_NUMBER)
 
 
 def test_request_payment_mtn_ok_response(client: Client, httpx_mock: HTTPXMock):
@@ -91,7 +94,7 @@ def test_request_payment_mtn_ok_response(client: Client, httpx_mock: HTTPXMock):
         status_code=httpx.codes.OK,
         json={"responsecode": "00"},
     )
-    result = client.request_payment(phone="22991617451", amount=2000)
+    result = client.request_payment(phone=MTN_PHONE_NUMBER, amount=2000)
     assert result.state == OPERATION_CONFIRMED
 
 
@@ -100,7 +103,7 @@ def test_request_payment_mtn_refused(client: Client, httpx_mock: HTTPXMock):
     httpx_mock.add_response(
         url=payment_url, method="POST", status_code=httpx.codes.FORBIDDEN
     )
-    result = client.request_payment(phone="22991617451", amount=2000)
+    result = client.request_payment(phone=MTN_PHONE_NUMBER, amount=2000)
     assert result.state == OPERATION_REJECTED
 
 
@@ -115,7 +118,7 @@ def test_request_payment_mtn_rejected(client: Client, httpx_mock: HTTPXMock):
         method="POST",
         status_code=httpx.codes.OK,
     )
-    result = client.request_payment(phone="22991617451", amount=2000)
+    result = client.request_payment(phone=MTN_PHONE_NUMBER, amount=2000)
     assert result.state == OPERATION_REJECTED
 
 
@@ -127,7 +130,7 @@ def test_request_payment_moov_ok_response(client: Client, httpx_mock: HTTPXMock)
         status_code=httpx.codes.OK,
         json={"responsecode": "0"},
     )
-    result = client.request_payment(phone="22963588213", amount=2000)
+    result = client.request_payment(phone=MOOV_PHONE_NUMBER, amount=2000)
     assert result.state == OPERATION_CONFIRMED
 
 
@@ -138,7 +141,7 @@ def test_request_payment_moov_rejected(client: Client, httpx_mock: HTTPXMock):
         method="POST",
         status_code=httpx.codes.OK,
     )
-    result = client.request_payment(phone="22963588213", amount=2000)
+    result = client.request_payment(phone=MOOV_PHONE_NUMBER, amount=2000)
     assert result.state == OPERATION_REJECTED
 
 

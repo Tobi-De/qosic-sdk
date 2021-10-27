@@ -10,7 +10,7 @@ with open("README.rst") as readme_file:
 with open("HISTORY.rst") as history_file:
     history = history_file.read()
 
-requirements = ["httpx>=0.18.1", "pydantic>=1.8.2"]
+requirements = ["httpx>=0.18.1", "phonenumbers>=8.12.35", "pydantic>=1.8.2", "polling2>=0.5.0"]
 
 setup_requirements = [
     "pytest-runner",
@@ -19,7 +19,8 @@ setup_requirements = [
 test_requirements = [
     "pytest>=3",
     "pydantic>=1.8.2",
-    "pytest-httpx>=0.12.0"
+    "pytest-httpx>=0.12.0",
+    "polling2>=0.5.0"
 ]
 
 setup(
