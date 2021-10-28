@@ -11,4 +11,4 @@ from .models import (  # noqa
 
 __author__ = """Tobi DEGNON"""
 __email__ = "degnonfrancis@gmail.com"
-__version__ = "2.0.0"
+__version__ = "2.0.1"
