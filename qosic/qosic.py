@@ -62,8 +62,6 @@ class Client(BaseModel):
                 f"An error occurred while requesting {self.context + path}."
             )
         else:
-            print(payload)
-            print(response)
             if httpx.codes.is_server_error(value=response.status_code):
                 raise ServerError(
                     f"The qos server seems to fail for some reason, you can set your"
