@@ -40,7 +40,6 @@ Features
 - Clean and meaningful exceptions
 - 100 % test coverage
 - Configurable timeouts
-- Enable Logging for debug purpose
 
 Quickstart
 ----------
@@ -72,17 +71,6 @@ For those of you in a hurry, here's a sample code to get you started.
     server_pass = config.get("SERVER_PASS")
     # This is just for test purpose, you should directly pass the phone number
     raw_phone = config.get("PHONE_NUMBER")
-
-    providers = [
-        MTN(client_id=mtn_client_id, config=MtnConfig(step=30, timeout=60 * 2)),
-        MOOV(client_id=moov_client_id),
-    ]
-    client = Client(
-        providers=providers,
-        login=server_login,
-        password=server_pass,
-        active_logging=True,
-    )
 
 
     def main():
@@ -122,7 +110,6 @@ For those of you in a hurry, here's a sample code to get you started.
 
     if __name__ == "__main__":
         main()
-
 
 
 Credits
