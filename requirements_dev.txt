@@ -8,7 +8,7 @@ coverage==6.3.2
 Sphinx==4.4.0
 twine==3.8.0
 httpx==0.22.0
-python-dotenv==0.19.0
+python-dotenv==0.19.2
 pydantic==1.9.0
 phonenumbers==8.12.43
 polling2==0.5.0
