@@ -1,0 +1,6 @@
+- [ ] cleanup and simplify code where possible
+- [ x ] change read the doc theme
+- [ ] move to peotry
+- [ ] add python badges
+- [ ] add support for python 3.10
+- [ ] add support for async
