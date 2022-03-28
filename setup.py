@@ -50,6 +50,6 @@ setup(
     test_suite="tests",
     tests_require=test_requirements,
     url="https://github.com/Tobi-De/qosic-sdk",
-    version="2.0.1",
+    version="3.0.0",
     zip_safe=False,
 )

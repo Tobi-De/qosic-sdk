@@ -5,4 +5,4 @@ from .utils import Result, Payer  # noqa
 
 __author__ = """Tobi DEGNON"""
 __email__ = "degnonfrancis@gmail.com"
-__version__ = "2.0.1"
+__version__ = "3.0.0"
