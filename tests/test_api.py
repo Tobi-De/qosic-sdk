@@ -7,8 +7,8 @@ import pytest
 from pytest_httpx import HTTPXMock
 
 from qosic import Client, MOOV, MTN
-from qosic.constants import MTN_REFUND_PATH, MTN_PAYMENT_PATH, MTN_PAYMENT_STATUS_PATH, MOOV_PAYMENT_PATH
-from qosic.exceptions import (
+from qosic.config import MTN_REFUND_PATH, MTN_PAYMENT_PATH, MTN_PAYMENT_STATUS_PATH, MOOV_PAYMENT_PATH
+from qosic.errors import (
     InvalidCredentialsError,
     InvalidClientIdError,
     ServerError,

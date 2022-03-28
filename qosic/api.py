@@ -1,14 +1,13 @@
 from __future__ import annotations
 
+import httpx
 from dataclasses import dataclass, field
 
-import httpx
-import phonenumbers
-
-from .constants import QOSIC_BASE_URL
-from .exceptions import ProviderNotFoundError
+from .config import QOSIC_BASE_URL
+from .errors import ProviderNotFoundError
 from .protocols import Provider
-from .utils import Result
+from .providers import MTN
+from .utils import Result, provider_by_phone, Payer, log_response, log_request
 
 
 @dataclass
@@ -17,6 +16,7 @@ class Client:
     :param providers: The list of your provider
     :param login: Your server authentication login/user
     :param password: Your server authentication password
+    :param debug: If true print request and response to console
     :param base_url: The QosIC server root domain if you ever need to change it
     """
 
@@ -24,7 +24,8 @@ class Client:
     password: str
     providers: list[Provider]
     base_url: str = QOSIC_BASE_URL
-    _http_client: httpx.Client = field(init=False)
+    debug: bool = False
+    _http_client: httpx.Client = field(init=False, repr=False)
 
     def __post_init__(self):
         self._http_client = httpx.Client(
@@ -34,6 +35,11 @@ class Client:
             verify=False,
             timeout=80,
         )
+        if self.debug:
+            self._http_client.event_hooks = {
+                "request": [log_request],
+                "response": [log_response],
+            }
 
     def __del__(self):
         self._http_client.close()
@@ -46,42 +52,22 @@ class Client:
 
     def pay(
         self,
+        *,
         phone: str,
         amount: int,
         first_name: str,
         last_name: str,
     ) -> Result:
-        phone = phonenumbers.parse(phone)
-        prefix = str(phone.national_number)[:2]
-        try:
-            provider = [
-                provider
-                for provider in self.providers
-                if prefix in provider.allowed_prefixes
-            ][0]
-        except IndexError:
-            raise ProviderNotFoundError(
-                f"A provider was not found for the given phone number: {phone}"
-            )
-        return provider.pay(
-            self._http_client,
-            phone=phone,
-            amount=amount,
-            first_name=first_name,
-            last_name=last_name,
-        )
+        payer = Payer(phone, amount, first_name, last_name)
+        provider = provider_by_phone(phone=phone, providers=self.providers)
+        return provider.pay(self._http_client, payer=payer)
 
-    def refund(self, reference: str, client_id: str) -> Result:
-        try:
-            provider = [
-                provider
-                for provider in self.providers
-                if provider.client_id == client_id
-            ][0]
-        except IndexError:
-            raise ProviderNotFoundError(
-                f"A provider was not found for the given client id: {client_id}"
-            )
-        return provider.refund(
-            self._http_client, reference=reference, client_id=client_id
-        )
+    def refund(self, reference: str) -> Result:
+        # Only mtn support refund at the moment
+        mtn = None
+        for provider in self.providers:
+            if isinstance(provider, MTN):
+                mtn = provider
+        if not mtn:
+            raise ProviderNotFoundError(f"An mtn provider was not found")
+        return mtn.refund(self._http_client, reference=reference)
