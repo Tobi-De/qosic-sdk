@@ -38,7 +38,6 @@ def test_request_refund_ok_response(client: Client, httpx_mock: HTTPXMock):
     httpx_mock.add_response(
         url=url, method="POST", status_code=httpx.codes.OK, json={"responsecode": "00"}
     )
-    # add response code body
     result = client.refund(reference=get_random_string())
     assert result.success
 
