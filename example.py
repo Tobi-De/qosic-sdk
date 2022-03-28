@@ -20,13 +20,13 @@ def main():
         password=server_pass,
         debug=True
     )
-    result = client.pay(phone=phone, amount=1000, first_name="User", last_name="TEST")
+    result = client.pay(phone=phone, amount=500, first_name="User", last_name="TEST")
     print(result)
     if result.success:
         print(f"Everything went fine")
 
-    # result = client.refund(reference=result.reference)
-    # print(result)
+    result = client.refund(reference=result.reference)
+    print(result)
 
 
 if __name__ == "__main__":

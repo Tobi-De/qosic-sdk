@@ -28,7 +28,7 @@ def _extract_json(response: httpx.Response):
         return {"responsecode": None}
 
 
-def _handle_errors(status_code: int, provider: Provider, payer: Payer):
+def _handle_common_errors(status_code: int, provider: Provider, payer: Payer):
     provider_name = provider.__class__.__name__
     errors = {
         codes.UNAUTHORIZED: InvalidCredentialsError(
@@ -64,10 +64,18 @@ def _req_body_from_payer(provider: Provider, payer: Payer) -> dict:
     }
 
 
+def _resp_is_ok(response: httpx.Response):
+    return response.status_code == httpx.codes.OK
+
+
+class MTNPaymentRejected(Exception):
+    pass
+
+
 @dataclass(frozen=True)
 class MTN:
     id: str
-    step: int = 30
+    step: int = 10
     timeout: int = 60 * 2
     max_tries: int | None = None
     allowed_prefixes: list[str] = field(default_factory=lambda: config.MTN_PREFIXES)
@@ -75,13 +83,10 @@ class MTN:
 
     def __post_init__(self):
         _validate_reference_factory(self.reference_factory)
-        assert 10 <= self.step <= 90, f"Step ({self.step}) must be between 10 and 90"
+        assert 5 <= self.step <= 30, f"Step {self.step} must be between 5 and 30"
         assert (
-            60 <= self.timeout <= 60 * 5
-        ), f"Timeout ({self.step}) must be between 60 and 60 * 5"
-        assert (
-            self.step < self.timeout
-        ), f"Your step must be inferior to your timeout: {self.step} >= {self.timeout}"
+            60 <= self.timeout <= 180
+        ), f"Timeout {self.timeout}  must be between 60 and 180"
         if self.max_tries:
             assert (
                 self.max_tries * self.step <= self.timeout
@@ -90,24 +95,27 @@ class MTN:
     def pay(self, client: httpx.Client, *, payer: Payer) -> Result:
         body = _req_body_from_payer(self, payer)
         response = client.post(url=config.MTN_PAYMENT_PATH, json=body)
-        _handle_errors(response.status_code, provider=self, payer=payer)
-        if response.status_code == httpx.codes.ACCEPTED:
-            try:
-                status = polling2.poll(
-                    target=self._check_status,
-                    check_success=polling2.is_value(Result.Status.CONFIRMED),
-                    step=self.step,
-                    timeout=self.timeout,
-                    max_tries=self.max_tries,
-                    kwargs={"reference": body["transref"], "client": client},
-                )
-            except polling2.TimeoutException:
-                status = Result.Status.FAILED
-        else:
-            status = Result.Status.FAILED
-        return Result(
-            reference=body["transref"], provider=self, status=status, response=response
-        )
+        _handle_common_errors(response.status_code, provider=self, payer=payer)
+        res_dict = {
+            "reference": body["transref"],
+            "provider": self,
+            "status": Result.Status.FAILED,
+            "response": response,
+        }
+        if response.status_code != httpx.codes.ACCEPTED:
+            return Result(**res_dict)
+        try:
+            res_dict["status"] = polling2.poll(
+                target=self._check_status,
+                check_success=polling2.is_value(Result.Status.CONFIRMED),
+                step=self.step,
+                timeout=self.timeout,
+                max_tries=self.max_tries,
+                kwargs={"reference": body["transref"], "client": client},
+            )
+        except (polling2.TimeoutException, MTNPaymentRejected):
+            pass
+        return Result(**res_dict)
 
     def _check_status(self, *, client: httpx.Client, reference: str) -> Result.Status:
         response = client.post(
@@ -115,24 +123,19 @@ class MTN:
             json={"clientid": self.id, "transref": reference},
         )
         json_content = _extract_json(response)
-        if (
-            response.status_code == httpx.codes.OK
-            and json_content["responsecode"] == "00"
-        ):
-            status = Result.Status.CONFIRMED
-        else:
-            status = Result.Status.FAILED
-        return status
+        if not _resp_is_ok(response) or json_content["responsecode"] is None:
+            raise MTNPaymentRejected()
+        if _resp_is_ok(response) and json_content["responsecode"] == "00":
+            return Result.Status.CONFIRMED
+        return Result.Status.FAILED
 
     def refund(self, client: httpx.Client, *, reference: str) -> Result:
         response = client.post(
             url=config.MTN_REFUND_PATH,
             json={"clientid": self.id, "transref": reference},
         )
-        if response.status_code == httpx.codes.OK:
-            status = Result.Status.CONFIRMED
-        else:
-            status = Result.Status.FAILED
+        ok = _resp_is_ok(response) and _extract_json(response)["responsecode"] == "00"
+        status = Result.Status.CONFIRMED if ok else Result.Status.FAILED
         return Result(
             reference=reference, provider=self, status=status, response=response
         )
@@ -150,14 +153,10 @@ class MOOV:
     def pay(self, client: httpx.Client, *, payer: Payer) -> Result:
         body = _req_body_from_payer(self, payer)
         response = client.post(url=config.MOOV_PAYMENT_PATH, json=body)
+        _handle_common_errors(response.status_code, provider=self, payer=payer)
         json_content = _extract_json(response)
-        if (
-            response.status_code == httpx.codes.OK
-            and json_content["responsecode"] == "0"
-        ):
-            status = Result.Status.CONFIRMED
-        else:
-            status = Result.Status.FAILED
+        ok = _resp_is_ok(response) and json_content["responsecode"] == "0"
+        status = Result.Status.CONFIRMED if ok else Result.Status.FAILED
         return Result(
             reference=body["transref"], provider=self, status=status, response=response
         )
