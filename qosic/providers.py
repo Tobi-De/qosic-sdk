@@ -12,6 +12,7 @@ from .errors import (
     InvalidCredentialsError,
     InvalidProviderIDError,
     UserAccountNotFoundError,
+    ServerError,
 )
 from .protocols import Provider
 from .utils import Result, Payer, get_random_string
@@ -28,22 +29,24 @@ def _extract_json(response: httpx.Response):
         return {"responsecode": None}
 
 
-def _handle_common_errors(status_code: int, provider: Provider, payer: Payer):
-    provider_name = provider.__class__.__name__
-    errors = {
-        codes.UNAUTHORIZED: InvalidCredentialsError(
-            f"Your qosic credentials are invalid"
-        ),
-        codes.NOT_FOUND: InvalidProviderIDError(
-            f"Your {provider_name} client Id is invalid"
-        ),
-        codes.EXPECTATION_FAILED: UserAccountNotFoundError(
+def _handle_common_errors(response: httpx.Response, **kwargs) -> None:
+    status: int = response.status_code  # noqa
+    if codes.is_server_error(status):
+        raise ServerError(
+            "Qosic server if failing for some reason, active debug for more details."
+        )
+    provider = kwargs.get("provider", None)
+    if provider and codes.NOT_FOUND == status:
+        raise InvalidProviderIDError(
+            f"Your {provider.__class__.__name__} Id is invalid"
+        )
+    if codes.UNAUTHORIZED == status:
+        raise InvalidCredentialsError("Your qosic credentials are invalid")
+    payer = kwargs.get("payer", None)
+    if payer and codes.EXPECTATION_FAILED == status:
+        raise UserAccountNotFoundError(
             f"A mobile money account was not found for {payer.phone}"
-        ),
-    }
-    error = errors.get(status_code, None)  # noqa
-    if error:
-        raise error
+        )
 
 
 def _validate_reference_factory(func: callable) -> None:
@@ -95,7 +98,7 @@ class MTN:
     def pay(self, client: httpx.Client, *, payer: Payer) -> Result:
         body = _req_body_from_payer(self, payer)
         response = client.post(url=config.MTN_PAYMENT_PATH, json=body)
-        _handle_common_errors(response.status_code, provider=self, payer=payer)
+        _handle_common_errors(response, provider=self, payer=payer)
         res_dict = {
             "reference": body["transref"],
             "provider": self,
@@ -134,6 +137,7 @@ class MTN:
             url=config.MTN_REFUND_PATH,
             json={"clientid": self.id, "transref": reference},
         )
+        _handle_common_errors(response, provider=self)
         ok = _resp_is_ok(response) and _extract_json(response)["responsecode"] == "00"
         status = Result.Status.CONFIRMED if ok else Result.Status.FAILED
         return Result(
@@ -153,7 +157,7 @@ class MOOV:
     def pay(self, client: httpx.Client, *, payer: Payer) -> Result:
         body = _req_body_from_payer(self, payer)
         response = client.post(url=config.MOOV_PAYMENT_PATH, json=body)
-        _handle_common_errors(response.status_code, provider=self, payer=payer)
+        _handle_common_errors(response, provider=self, payer=payer)
         json_content = _extract_json(response)
         ok = _resp_is_ok(response) and json_content["responsecode"] == "0"
         status = Result.Status.CONFIRMED if ok else Result.Status.FAILED

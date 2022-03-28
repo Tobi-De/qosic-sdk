@@ -1,3 +1,7 @@
+class ServerError(Exception):
+    pass
+
+
 class UserAccountNotFoundError(Exception):
     pass
 

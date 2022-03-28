@@ -13,12 +13,10 @@ phone = config.get("PHONE_NUMBER")
 
 
 def main():
-    providers = [MTN(id=mtn_client_id), MOOV(id=moov_client_id)]
     client = Client(
-        providers=providers,
         login=server_login,
         password=server_pass,
-        debug=True
+        providers=[MTN(id=mtn_client_id), MOOV(id=moov_client_id)],
     )
     result = client.pay(phone=phone, amount=500, first_name="User", last_name="TEST")
     print(result)

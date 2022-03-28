@@ -7,23 +7,24 @@ import pytest
 from pytest_httpx import HTTPXMock
 
 from qosic import Client, MOOV, MTN
-from qosic.config import MTN_REFUND_PATH, MTN_PAYMENT_PATH, MTN_PAYMENT_STATUS_PATH, MOOV_PAYMENT_PATH
-from qosic.errors import (
-    InvalidCredentialsError,
-    InvalidClientIdError,
-    ServerError,
+from qosic.config import (
+    MTN_REFUND_PATH,
+    MTN_PAYMENT_PATH,
+    MTN_PAYMENT_STATUS_PATH,
+    MOOV_PAYMENT_PATH,
 )
+from qosic.errors import InvalidCredentialsError, ServerError
 from qosic.utils import get_random_string
 
-MTN_PHONE_NUMBER = "+22991617451"
-MOOV_PHONE_NUMBER = "+22963588213"
+MTN_PHONE_NUMBER = "22991617451"
+MOOV_PHONE_NUMBER = "22963588213"
 
 
 @pytest.fixture
 def client():
     providers = [
-        MTN(client_id=get_random_string(), step=30, timeout=60),
-        MOOV(client_id=get_random_string()),
+        MTN(id=get_random_string()),
+        MOOV(id=get_random_string()),
     ]
     return Client(
         login=get_random_string(),
@@ -34,21 +35,19 @@ def client():
 
 def test_request_refund_ok_response(client: Client, httpx_mock: HTTPXMock):
     url = client.base_url + MTN_REFUND_PATH
-    httpx_mock.add_response(url=url, method="POST", status_code=httpx.codes.OK)
-    result = client.refund(reference=get_random_string(), client_id="fake")
+    httpx_mock.add_response(
+        url=url, method="POST", status_code=httpx.codes.OK, json={"responsecode": "00"}
+    )
+    # add response code body
+    result = client.refund(reference=get_random_string())
     assert result.success
 
 
 def test_request_refund_rejected(client: Client, httpx_mock: HTTPXMock):
     url = client.base_url + MTN_REFUND_PATH
     httpx_mock.add_response(url=url, method="POST", status_code=httpx.codes.BAD_REQUEST)
-    result = client.refund(reference=get_random_string(), client_id="fake")
-    assert result.success
-
-
-def test_request_refund_bad_provider(client: Client, httpx_mock: HTTPXMock):
-    with pytest.raises(AssertionError):
-        client.refund(reference=get_random_string(), client_id="fake")
+    result = client.refund(reference=get_random_string())
+    assert not result.success
 
 
 def test_request_refund_unauthorized_response(client: Client, httpx_mock: HTTPXMock):
@@ -57,14 +56,7 @@ def test_request_refund_unauthorized_response(client: Client, httpx_mock: HTTPXM
         url=url, method="POST", status_code=httpx.codes.UNAUTHORIZED
     )
     with pytest.raises(InvalidCredentialsError):
-        client.refund(reference=get_random_string(), client_id="fake")
-
-
-def test_request_refund_not_found_response(client: Client, httpx_mock: HTTPXMock):
-    url = client.base_url + MTN_REFUND_PATH
-    httpx_mock.add_response(url=url, method="POST", status_code=httpx.codes.NOT_FOUND)
-    with pytest.raises(InvalidClientIdError):
-        client.refund(reference=get_random_string(), client_id="fake")
+        client.refund(reference=get_random_string())
 
 
 def test_request_refund_gateway_timeout_response(client: Client, httpx_mock: HTTPXMock):
@@ -73,7 +65,7 @@ def test_request_refund_gateway_timeout_response(client: Client, httpx_mock: HTT
         url=url, method="POST", status_code=httpx.codes.GATEWAY_TIMEOUT
     )
     with pytest.raises(ServerError):
-        client.refund(reference=get_random_string(), client_id="fake")
+        client.refund(reference=get_random_string())
 
 
 def test_request_payment_mtn_ok_response(client: Client, httpx_mock: HTTPXMock):
@@ -88,7 +80,9 @@ def test_request_payment_mtn_ok_response(client: Client, httpx_mock: HTTPXMock):
         status_code=httpx.codes.OK,
         json={"responsecode": "00"},
     )
-    result = client.pay(phone=MTN_PHONE_NUMBER, amount=2000, first_name="jean", last_name="pierre")
+    result = client.pay(
+        phone=MTN_PHONE_NUMBER, amount=2000, first_name="jean", last_name="pierre"
+    )
     assert result.success
 
 
@@ -97,8 +91,10 @@ def test_request_payment_mtn_refused(client: Client, httpx_mock: HTTPXMock):
     httpx_mock.add_response(
         url=payment_url, method="POST", status_code=httpx.codes.FORBIDDEN
     )
-    result = client.pay(phone=MTN_PHONE_NUMBER, amount=2000, first_name="jean", last_name="pierre")
-    assert result.success
+    result = client.pay(
+        phone=MTN_PHONE_NUMBER, amount=2000, first_name="jean", last_name="pierre"
+    )
+    assert not result.success
 
 
 def test_request_payment_mtn_rejected(client: Client, httpx_mock: HTTPXMock):
@@ -112,7 +108,9 @@ def test_request_payment_mtn_rejected(client: Client, httpx_mock: HTTPXMock):
         method="POST",
         status_code=httpx.codes.OK,
     )
-    result = client.pay(phone=MTN_PHONE_NUMBER, amount=2000)
+    result = client.pay(
+        phone=MTN_PHONE_NUMBER, amount=2000, first_name="jean", last_name="dnd"
+    )
     assert not result.success
 
 
@@ -124,7 +122,9 @@ def test_request_payment_moov_ok_response(client: Client, httpx_mock: HTTPXMock)
         status_code=httpx.codes.OK,
         json={"responsecode": "0"},
     )
-    result = client.pay(phone=MOOV_PHONE_NUMBER, amount=2000, first_name="jean", last_name="nb")
+    result = client.pay(
+        phone=MOOV_PHONE_NUMBER, amount=2000, first_name="jean", last_name="nb"
+    )
     assert result.success
 
 
@@ -135,8 +135,11 @@ def test_request_payment_moov_rejected(client: Client, httpx_mock: HTTPXMock):
         method="POST",
         status_code=httpx.codes.OK,
     )
-    result = client.pay(phone=MOOV_PHONE_NUMBER, amount=2000, first_name="jean", last_name="nb")
+    result = client.pay(
+        phone=MOOV_PHONE_NUMBER, amount=2000, first_name="jean", last_name="nb"
+    )
     assert not result.success
+
 
 # def test_send_request(client: Client, httpx_mock: HTTPXMock):
 #     fake_path = "/fakepath"
