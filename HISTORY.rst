@@ -2,6 +2,14 @@
 History
 =======
 
+3.0.0 (2022-03-28)
+------------------
+
+* Complete rewrite
+* Remove pydantic and phonenumbers as dependencies
+* simplify the code
+
+
 2.0.0 (2021-10-27)
 ------------------
 
