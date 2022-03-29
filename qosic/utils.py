@@ -24,9 +24,7 @@ def log_request(request: httpx.Request):
 def log_response(response: httpx.Response):
     print()
     request = response.request
-    print(
-        f"RESPONSE: {request.method} {request.url} - Status {response.status_code}"
-    )
+    print(f"RESPONSE: {request.method} {request.url} - Status {response.status_code}")
     print(f"{response.read()}")
     print()
 

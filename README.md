@@ -1,56 +1,36 @@
-=========
-qosic-sdk
-=========
+# qosic-sdk
 
 
-.. image:: https://img.shields.io/pypi/v/qosic-sdk.svg
-        :target: https://pypi.python.org/pypi/qosic-sdk
+[![pypi](https://img.shields.io/pypi/v/qosic-sdk.svg)](https://pypi.python.org/pypi/qosic-sdk)
+[![travis](https://api.travis-ci.com/Tobi-De/qosic-sdk.svg)](https://travis-ci.com/Tobi-De/qosic-sdk)
+[![python](https://img.shields.io/pypi/pyversions/qosic-sdk)](https://github.com/Tobi-De/qosic-sdk)
+[![ReadTheDoc](https://readthedocs.org/projects/qosic-sdk/badge/?version=latest)](https://qosic-sdk.readthedocs.io/en/latest/?version=latest)
+[![MIT License](https://img.shields.io/apm/l/atomic-design-ui.svg?)](https://github.com/Tobi-De/dj-shop-cart/blob/master/LICENSE)
+[![black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-.. image:: https://api.travis-ci.com/Tobi-De/qosic-sdk.svg
-        :target: https://travis-ci.com/Tobi-De/qosic-sdk
-
-.. image:: https://readthedocs.org/projects/qosic-sdk/badge/?version=latest
-        :target: https://qosic-sdk.readthedocs.io/en/latest/?version=latest
-        :alt: Documentation Status
-
-
-
-
-An unofficial python sdk for the QosIC_ platform. This platform provides an api to enable mobile
+An unofficial python sdk for the [QosIC](https://www.qosic.com/) platform. This platform provides an api to enable mobile
 money payments for businesses in Africa.
-
 
 * Free software: MIT license
 * Documentation: https://qosic-sdk.readthedocs.io.
 
-Supported Python versions
--------------------------
-
-This library was tested with the following Python implementations, but it should work for all python 3.6 and above.
-
-- python 3.6
-- Python 3.7
-- Python 3.8
-
-
-Features
---------
+## Features
 
 - Simple synchronous client to make your payment requests
+- Cover 100% of Qosic public api
 - Clean and meaningful exceptions
 - 100 % test coverage
 - Configurable timeouts
 
-Quickstart
-----------
+## Quickstart
 
 For those of you in a hurry, here's a sample code to get you started.
 
-.. code-block:: shell
-
+```shell
     pip install qosic-sdk
+```
 
-.. code-block:: python3
+```python
 
     from dotenv import dotenv_values
     from qosic import Client, MTN, MOOV
@@ -64,7 +44,7 @@ For those of you in a hurry, here's a sample code to get you started.
     # This is just for test purpose, you should directly pass the phone number
     phone = config.get("PHONE_NUMBER")
 
-    
+
     def main():
         client = Client(
             login=server_login,
@@ -83,12 +63,9 @@ For those of you in a hurry, here's a sample code to get you started.
     if __name__ == "__main__":
         main()
 
+```
 
-Credits
--------
+## Credits
 
-This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypackage`_ project template.
-
-.. _Cookiecutter: https://github.com/audreyr/cookiecutter
-.. _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
-.. _QosIC: https://www.qosic.com/
+This package was created with [Cookiecutter](https://github.com/audreyr/cookiecutter) and the
+[audreyr/cookiecutter-pypackage](https://github.com/audreyr/cookiecutter-pypackage) project template.

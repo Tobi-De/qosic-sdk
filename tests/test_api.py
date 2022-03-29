@@ -1,7 +1,3 @@
-#!/usr/bin/env python
-
-"""Tests for `qosic` package."""
-
 import httpx
 import pytest
 from pytest_httpx import HTTPXMock
@@ -138,21 +134,3 @@ def test_request_payment_moov_rejected(client: Client, httpx_mock: HTTPXMock):
         phone=MOOV_PHONE_NUMBER, amount=2000, first_name="jean", last_name="nb"
     )
     assert not result.success
-
-
-# def test_send_request(client: Client, httpx_mock: HTTPXMock):
-#     fake_path = "/fakepath"
-#     with pytest.raises(RequestError):
-#         client._send_request(path=fake_path, payload={})
-#
-#     real_url = client.context + MTN_PAYMENT_PATH
-#     httpx_mock.add_response(url=real_url, status_code=httpx.codes.UNAUTHORIZED)
-#     with pytest.raises(InvalidCredentialsError):
-#         client._send_request(path=MTN_PAYMENT_PATH, payload={})
-#
-#     real_url2 = client.context + MTN_PAYMENT_STATUS_PATH
-#     httpx_mock.add_response(url=real_url2, status_code=httpx.codes.NOT_FOUND)
-#     with pytest.raises(InvalidClientIdError):
-#         client._send_request(
-#             path=MTN_PAYMENT_STATUS_PATH, payload={"clientid": get_random_string()}
-#         )

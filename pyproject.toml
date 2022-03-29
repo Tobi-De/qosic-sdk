@@ -1,0 +1,41 @@
+[tool.poetry]
+name = "qosic-sdk"
+version = "3.0.1"
+description = "An unofficial python sdk for the QosIc platform."
+authors = ["Tobi-De <tobidegnon@protonmail.com>"]
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/Tobi-De/qosic-sdk"
+homepage = "https://github.com/Tobi-De/qosic-sdk"
+keywords = ["python", "qosic-sdk", "qosic", "qos", "payment", "momo", "mobile money"]
+packages = [
+    { include = "qosic" }
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Programming Language :: Python :: 3 :: Only",
+    "Intended Audience :: Developers",
+    "Natural Language :: English",
+    "License :: OSI Approved :: MIT License",
+]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+httpx = "^0.22.0"
+polling2 = "^0.5.0"
+
+[tool.poetry.dev-dependencies]
+black = "^22.3.0"
+mypy = "^0.942"
+python-dotenv = "^0.20.0"
+coverage = "^6.3.2"
+flake8 = "^4.0.1"
+furo = "^2022.3.4"
+types-dataclasses = "^0.6.4"
+pytest = "^7.1.1"
+pytest-httpx = "^0.20.0"
+pytest-runner = "^6.0.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
