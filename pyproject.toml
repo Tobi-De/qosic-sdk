@@ -4,7 +4,7 @@ version = "3.0.1"
 description = "An unofficial python sdk for the QosIc platform."
 authors = ["Tobi-De <tobidegnon@protonmail.com>"]
 license = "MIT"
-readme = "README.md"
+readme = "README.rst"
 repository = "https://github.com/Tobi-De/qosic-sdk"
 homepage = "https://github.com/Tobi-De/qosic-sdk"
 keywords = ["python", "qosic-sdk", "qosic", "qos", "payment", "momo", "mobile money"]
@@ -34,6 +34,7 @@ furo = "^2022.3.4"
 types-dataclasses = "^0.6.4"
 pytest = "^7.1.1"
 pytest-httpx = "^0.20.0"
+myst-parser = "^0.17.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
