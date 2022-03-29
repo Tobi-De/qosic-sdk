@@ -14,5 +14,4 @@ furo==2022.03.04
 types-dataclasses
 
 pytest==7.1.1
-pytest-runner==6.0.0
 pytest-httpx==0.20.0

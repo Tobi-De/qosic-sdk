@@ -34,7 +34,6 @@ furo = "^2022.3.4"
 types-dataclasses = "^0.6.4"
 pytest = "^7.1.1"
 pytest-httpx = "^0.20.0"
-pytest-runner = "^6.0.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

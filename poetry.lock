@@ -450,18 +450,6 @@ pytest = ">=6,<8"
 testing = ["pytest-asyncio (>=0.17.0,<0.18.0)", "pytest-cov (>=3.0.0,<4.0.0)"]
 
 [[package]]
-name = "pytest-runner"
-version = "6.0.0"
-description = "Invoke py.test as distutils command with dependency resolution"
-category = "dev"
-optional = false
-python-versions = ">=3.7"
-
-[package.extras]
-docs = ["sphinx", "jaraco.packaging (>=9)", "rst.linker (>=1.9)", "jaraco.tidelift (>=1.4)"]
-testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-cov", "pytest-enabler (>=1.0.1)", "pytest-virtualenv", "types-setuptools", "pytest-black (>=0.3.7)", "pytest-mypy (>=0.9.1)"]
-
-[[package]]
 name = "python-dotenv"
 version = "0.20.0"
 description = "Read key-value pairs from a .env file and set them as environment variables"
@@ -691,7 +679,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "234d1cf1a7bda6ed9e60cc75f7653b58a7b77386d7b46d156870d250f4f635e4"
+content-hash = "7a91f1ac1e2c69eb761e36e424425d82bf219e3e672b708c3014060300c126d7"
 
 [metadata.files]
 alabaster = [
@@ -968,10 +956,6 @@ pytest = [
 pytest-httpx = [
     {file = "pytest_httpx-0.20.0-py3-none-any.whl", hash = "sha256:75c7c6a97e129416c4ba29e5a1ddbac1b3c0142179e3fb7f0afa3083898170c7"},
     {file = "pytest_httpx-0.20.0.tar.gz", hash = "sha256:ff3cfc35cd6969126cc8edccd4e3baba02feb58bf55c86f5f316f8298682aea4"},
-]
-pytest-runner = [
-    {file = "pytest-runner-6.0.0.tar.gz", hash = "sha256:b4d85362ed29b4c348678de797df438f0f0509497ddb8c647096c02a6d87b685"},
-    {file = "pytest_runner-6.0.0-py3-none-any.whl", hash = "sha256:4c059cf11cf4306e369c0f8f703d1eaf8f32fad370f41deb5f007044656aca6b"},
 ]
 python-dotenv = [
     {file = "python-dotenv-0.20.0.tar.gz", hash = "sha256:b7e3b04a59693c42c36f9ab1cc2acc46fa5df8c78e178fc33a8d4cd05c8d498f"},
