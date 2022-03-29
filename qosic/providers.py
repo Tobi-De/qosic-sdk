@@ -7,7 +7,7 @@ import polling2
 from dataclasses import dataclass, field
 from httpx import codes
 
-from . import config
+from . import constants
 from .errors import (
     InvalidCredentialsError,
     InvalidProviderIDError,
@@ -81,7 +81,7 @@ class MTN:
     step: int = 10
     timeout: int = 60 * 2
     max_tries: int | None = None
-    allowed_prefixes: list[str] = field(default_factory=lambda: config.MTN_PREFIXES)
+    allowed_prefixes: list[str] = field(default_factory=lambda: constants.MTN_PREFIXES)
     reference_factory: callable = _generic_reference_factory
 
     def __post_init__(self):
@@ -97,7 +97,7 @@ class MTN:
 
     def pay(self, client: httpx.Client, *, payer: Payer) -> Result:
         body = _req_body_from_payer(self, payer)
-        response = client.post(url=config.MTN_PAYMENT_PATH, json=body)
+        response = client.post(url=constants.MTN_PAYMENT_PATH, json=body)
         _handle_common_errors(response, provider=self, payer=payer)
         res_dict = {
             "reference": body["transref"],
@@ -122,7 +122,7 @@ class MTN:
 
     def _check_status(self, *, client: httpx.Client, reference: str) -> Result.Status:
         response = client.post(
-            url=config.MTN_PAYMENT_STATUS_PATH,
+            url=constants.MTN_PAYMENT_STATUS_PATH,
             json={"clientid": self.id, "transref": reference},
         )
         json_content = _extract_json(response)
@@ -134,7 +134,7 @@ class MTN:
 
     def refund(self, client: httpx.Client, *, reference: str) -> Result:
         response = client.post(
-            url=config.MTN_REFUND_PATH,
+            url=constants.MTN_REFUND_PATH,
             json={"clientid": self.id, "transref": reference},
         )
         _handle_common_errors(response, provider=self)
@@ -148,7 +148,7 @@ class MTN:
 @dataclass(frozen=True)
 class MOOV:
     id: str
-    allowed_prefixes: list[str] = field(default_factory=lambda: config.MOOV_PREFIXES)
+    allowed_prefixes: list[str] = field(default_factory=lambda: constants.MOOV_PREFIXES)
     reference_factory: callable = _generic_reference_factory
 
     def __post_init__(self):
@@ -156,7 +156,7 @@ class MOOV:
 
     def pay(self, client: httpx.Client, *, payer: Payer) -> Result:
         body = _req_body_from_payer(self, payer)
-        response = client.post(url=config.MOOV_PAYMENT_PATH, json=body)
+        response = client.post(url=constants.MOOV_PAYMENT_PATH, json=body)
         _handle_common_errors(response, provider=self, payer=payer)
         json_content = _extract_json(response)
         ok = _resp_is_ok(response) and json_content["responsecode"] == "0"

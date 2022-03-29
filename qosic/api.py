@@ -3,7 +3,7 @@ from __future__ import annotations
 import httpx
 from dataclasses import dataclass, field
 
-from .config import QOSIC_BASE_URL
+from .constants import QOSIC_BASE_URL
 from .errors import ProviderNotFoundError
 from .protocols import Provider
 from .providers import MTN

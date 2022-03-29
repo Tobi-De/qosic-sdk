@@ -3,7 +3,7 @@ import pytest
 from pytest_httpx import HTTPXMock
 
 from qosic import Client, MOOV, MTN
-from qosic.config import (
+from qosic.constants import (
     MTN_REFUND_PATH,
     MTN_PAYMENT_PATH,
     MTN_PAYMENT_STATUS_PATH,
