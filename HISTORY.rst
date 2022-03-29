@@ -55,7 +55,7 @@ History
 ------------------
 
 * Change timeout defaults.
-*Update docs.
+* Update docs.
 
 
 1.0.1 (2021-05-14)
