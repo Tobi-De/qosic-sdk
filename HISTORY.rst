@@ -6,6 +6,11 @@ History
 3.0.1 (2022-03-29)
 ------------------
 
+* Switch readme back to rst
+
+3.0.1 (2022-03-29)
+------------------
+
 * Switch to poetry
 * Add more tests
 
