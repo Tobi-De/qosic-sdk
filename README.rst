@@ -1,6 +1,11 @@
 qosic-sdk
 =========
 
+An unofficial python sdk for the `QosIC <https://www.qosic.com/>`__
+platform. This platform provides an api to enable mobile money payments
+for businesses in Africa.
+
+
 .. image:: https://img.shields.io/pypi/v/qosic-sdk.svg
         :target: https://pypi.python.org/pypi/qosic-sdk
 
@@ -20,10 +25,7 @@ qosic-sdk
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
         :target: https://github.com/psf/black
 
-
-An unofficial python sdk for the `QosIC <https://www.qosic.com/>`__
-platform. This platform provides an api to enable mobile money payments
-for businesses in Africa.
+----
 
 -  Free software: MIT license
 -  Documentation: https://qosic-sdk.readthedocs.io.
