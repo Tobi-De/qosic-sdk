@@ -3,3 +3,10 @@
 
 schedule: 'every day'
 update: all
+requirements:
+  - docs/requirements.txt:
+        update: all
+        pin: True
+  - requirements_test.txt:
+        update: all
+        pin: True
