@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 
 from .constants import QOSIC_BASE_URL
 from .errors import ProviderNotFoundError
-from .logger import logger
+from .logger import logger as _logger
 from .protocols import Provider
 from .providers import MTN
 from .utils import Result, provider_by_phone, Payer, log_response, log_request
@@ -27,7 +27,7 @@ class Client:
     password: str
     providers: list[Provider]
     base_url: str = QOSIC_BASE_URL
-    logger: bool = logger
+    logger: bool = _logger
     _http_client: httpx.Client = field(init=False, repr=False)
 
     def __post_init__(self):
