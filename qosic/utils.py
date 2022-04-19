@@ -3,6 +3,7 @@ from __future__ import annotations
 import re
 import secrets
 from enum import Enum
+from logging import Logger
 from string import ascii_letters, digits
 from typing import TYPE_CHECKING
 
@@ -15,18 +16,17 @@ if TYPE_CHECKING:
     from .protocols import Provider
 
 
-def log_request(request: httpx.Request):
-    print()
-    print(f"REQUEST: {request.method} {request.url} - Waiting for response")
-    print(request.read())
+def log_request(request: httpx.Request, /, *, logger: Logger):
+    logger.info(f"REQUEST: {request.method} {request.url} - Waiting for response")
+    logger.info(request.read())
 
 
-def log_response(response: httpx.Response):
-    print()
+def log_response(response: httpx.Response, /, *, logger: Logger):
     request = response.request
-    print(f"RESPONSE: {request.method} {request.url} - Status {response.status_code}")
-    print(f"{response.read()}")
-    print()
+    logger.info(
+        f"RESPONSE: {request.method} {request.url} - Status {response.status_code}"
+    )
+    logger.info(f"{response.read()}")
 
 
 def get_random_string(length: int = 12) -> str:

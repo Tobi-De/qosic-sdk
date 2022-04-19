@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+from functools import partial
+
 import httpx
 from dataclasses import dataclass, field
 
 from .constants import QOSIC_BASE_URL
 from .errors import ProviderNotFoundError
+from .logger import logger
 from .protocols import Provider
 from .providers import MTN
 from .utils import Result, provider_by_phone, Payer, log_response, log_request
@@ -16,7 +19,7 @@ class Client:
     :param providers: The list of your provider
     :param login: Your server authentication login/user
     :param password: Your server authentication password
-    :param debug: If true print request and response to console
+    :param logger: Custom logger
     :param base_url: The QosIC server root domain if you ever need to change it
     """
 
@@ -24,7 +27,7 @@ class Client:
     password: str
     providers: list[Provider]
     base_url: str = QOSIC_BASE_URL
-    debug: bool = False
+    logger: bool = logger
     _http_client: httpx.Client = field(init=False, repr=False)
 
     def __post_init__(self):
@@ -34,12 +37,11 @@ class Client:
             headers={"content-type": "application/json"},
             verify=False,
             timeout=80,
+            event_hooks={
+                "request": [partial(log_request, logger=self.logger)],
+                "response": [partial(log_response, logger=self.logger)],
+            },
         )
-        if self.debug:
-            self._http_client.event_hooks = {
-                "request": [log_request],
-                "response": [log_response],
-            }
 
     def __del__(self):
         self._http_client.close()
