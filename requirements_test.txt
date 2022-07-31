@@ -1,5 +1,5 @@
 pip==22.2.1
-flake8==4.0.1
+flake8==5.0.0
 coverage==6.4.1
 Sphinx==5.0.1
 httpx==0.23.0
