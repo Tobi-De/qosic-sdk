@@ -19,8 +19,8 @@ for businesses in Africa.
         :target: https://qosic-sdk.readthedocs.io/en/latest/?version=latest
         :alt: Documentation Status
 
-.. image:: https://img.shields.io/apm/l/atomic-design-ui.svg?
-        :target: https://github.com/Tobi-De/qosic-sdk/blob/master/LICENSE
+.. image:: https://img.shields.io/badge/license-MIT-blue.svg
+        :target: https://github.com/Tobi-De/qosic-sdk/blob/main/LICENSE
 
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
         :target: https://github.com/psf/black
