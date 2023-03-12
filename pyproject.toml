@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "qosic-sdk"
-version = "4.0.2"
+version = "4.0.3"
 description = "An unofficial python sdk for the QosIc platform."
 authors = ["Tobi-De <tobidegnon@protonmail.com>"]
 license = "MIT"
@@ -21,21 +21,19 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = "^3.8"
-httpx = "^0.22.0"
+httpx = "^0.23.3"
 polling2 = "^0.5.0"
 
 [tool.poetry.dev-dependencies]
-black = "^22.3.0"
-mypy = "^0.942"
-python-dotenv = "^0.20.0"
-coverage = "^6.3.2"
-flake8 = "^4.0.1"
-furo = "^2022.4.7"
-types-dataclasses = "^0.6.5"
-pytest = "^7.1.1"
-pytest-httpx = "^0.20.0"
-myst-parser = "^0.17.2"
-poetryup = "^0.6.1"
+black = "^23.1.0"
+mypy = "^1.1.1"
+python-dotenv = "^1.0.0"
+coverage = "^7.2.1"
+furo = "^2022.12.7"
+types-dataclasses = "^0.6.6"
+pytest = "^7.2.2"
+pytest-httpx = "^0.21.3"
+myst-parser = "^1.0.0"
 
 [tool.pytest.ini_options]
 filterwarnings = [
