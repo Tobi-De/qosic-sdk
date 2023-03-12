@@ -97,7 +97,7 @@ These are the available keyword arguments:
 
 **reference**: str
 
-The transaction reference of your payment request. This value is availablea after every payment request
+The transaction reference of your payment request. This value is available after every payment request
 in the result object.
 
 .. code-block :: python
@@ -119,7 +119,7 @@ corresponding classes are available for them.
 .. code-block:: python
 
     import os
-    from qosic import MTN, MtnConfig
+    from qosic import MTN
 
     mtn_client_id = os.getenv("MTN_CLIENT_ID")
 
@@ -127,8 +127,7 @@ corresponding classes are available for them.
 
 
 Payment request for this provider work in a way that involve polling to get the transaction status, you can check
-on the Qosic_ docs for more details. The MtnConfig class is a helper class that helps you define the
-step and timeout related to the poll function.
+on the Qosic_ docs for more details.
 The MTN provider class can take the following keyword arguments:
 
 **id** : str
