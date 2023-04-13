@@ -5,7 +5,7 @@ Credits
 Development Lead
 ----------------
 
-* Tobi DEGNON <degnonfrancis@gmail.com>
+* Tobi DEGNON <tobidegnon@proton.me>
 
 Contributors
 ------------

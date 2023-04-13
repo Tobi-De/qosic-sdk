@@ -3,7 +3,7 @@ Usage
 =====
 
 
-1. Initialize a client
+# Initialize a client
 ----------------------
 
 .. code-block:: python

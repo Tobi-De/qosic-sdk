@@ -69,7 +69,7 @@ class Payer:
     last_name: str
 
     def __post_init__(self):
-        if not re.fullmatch(r"[0-9]{11}", self.phone):
+        if not re.fullmatch(r"\d{11}", self.phone):
             raise InvalidPhoneNumberError(
                 f"Invalid format for {self.phone}, ex: 229XXXXXXXX"
             )

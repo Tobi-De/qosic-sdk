@@ -71,5 +71,5 @@ class Client:
             if isinstance(provider, MTN):
                 mtn = provider
         if not mtn:
-            raise ProviderNotFoundError(f"An mtn provider was not found")
+            raise ProviderNotFoundError("An mtn provider was not found")
         return mtn.refund(self._http_client, reference=reference)

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import contextlib
 import json
 
 import httpx
@@ -35,14 +36,14 @@ def _handle_common_errors(response: httpx.Response, **kwargs) -> None:
         raise ServerError(
             "Qosic server if failing for some reason, active debug for more details."
         )
-    provider = kwargs.get("provider", None)
+    provider = kwargs.get("provider")
     if provider and codes.NOT_FOUND == status:
         raise InvalidProviderIDError(
             f"Your {provider.__class__.__name__} Id is invalid"
         )
     if codes.UNAUTHORIZED == status:
         raise InvalidCredentialsError("Your qosic credentials are invalid")
-    payer = kwargs.get("payer", None)
+    payer = kwargs.get("payer")
     if payer and codes.EXPECTATION_FAILED == status:
         raise UserAccountNotFoundError(
             f"A mobile money account was not found for {payer.phone}"
@@ -107,7 +108,7 @@ class MTN:
         }
         if response.status_code != httpx.codes.ACCEPTED:
             return Result(**res_dict)
-        try:
+        with contextlib.suppress(polling2.TimeoutException, MTNPaymentRejected):
             res_dict["status"] = polling2.poll(
                 target=self._check_status,
                 check_success=polling2.is_value(Result.Status.CONFIRMED),
@@ -116,8 +117,6 @@ class MTN:
                 max_tries=self.max_tries,
                 kwargs={"reference": body["transref"], "client": client},
             )
-        except (polling2.TimeoutException, MTNPaymentRejected):
-            pass
         return Result(**res_dict)
 
     def _check_status(self, *, client: httpx.Client, reference: str) -> Result.Status:
