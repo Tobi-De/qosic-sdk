@@ -68,8 +68,8 @@ class Result:
 class Payer:
     phone: str
     amount: int
-    first_name: str
-    last_name: str
+    first_name: str | None = None
+    last_name: str | None = None
 
     def __post_init__(self):
         if not re.fullmatch(r"\d{11}", self.phone):

@@ -59,8 +59,8 @@ def _req_body_from_payer(provider: MobileCarrier, payer: Payer) -> dict:
         "msisdn": payer.phone,
         "amount": str(payer.amount),
         "transref": provider.reference_factory(payer),
-        "firstname": payer.first_name,
-        "lastname": payer.last_name,
+        "firstname": payer.first_name or "",
+        "lastname": payer.last_name or "",
     }
 
 

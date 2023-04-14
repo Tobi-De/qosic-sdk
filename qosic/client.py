@@ -54,10 +54,12 @@ class Client:
         *,
         phone: str,
         amount: int,
-        first_name: str,
-        last_name: str,
+        first_name: str | None = None,
+        last_name: str | None = None,
     ) -> Result:
-        payer = Payer(phone, amount, first_name, last_name)
+        payer = Payer(
+            phone=phone, amount=amount, first_name=first_name, last_name=last_name
+        )
         mobile_carrier = guess_mobile_carrier_from(
             phone=phone, mobile_carriers=self.mobile_carriers
         )
