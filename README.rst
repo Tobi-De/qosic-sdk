@@ -52,8 +52,7 @@ For those of you in a hurry, here’s a sample code to get you started.
 
 
        from dotenv import dotenv_values
-       from qosic import Client
-       from qosic.mobile_carriers import bj
+       from qosic import Client, bj
 
        config = dotenv_values(".env")
 
@@ -61,17 +60,15 @@ For those of you in a hurry, here’s a sample code to get you started.
        mtn_client_id = config.get("MTN_CLIENT_ID")
        server_login = config.get("SERVER_LOGIN")
        server_pass = config.get("SERVER_PASSWORD")
-       # This is just for test purpose, you should directly pass the phone number
-       phone = config.get("PHONE_NUMBER")
-
 
        def main():
+           phone = "229XXXXXXXX"
            client = Client(
                login=server_login,
                password=server_pass,
-               providers=[bj.MTN(id=mtn_client_id), bj.MOOV(id=moov_client_id)],
+               mobile_carriers=[bj.MTN(id=mtn_client_id), bj.MOOV(id=moov_client_id)],
            )
-           result = client.pay(phone=phone, amount=500, first_name="User", last_name="TEST")
+           result = client.pay(phone=phone, amount=500)
            print(result)
            if result.success:
                print(f"Everything went fine")

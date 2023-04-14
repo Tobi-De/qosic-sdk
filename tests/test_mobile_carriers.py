@@ -29,7 +29,7 @@ def test_provider():
             id=client_id,
             reference_factory=bad_random_string_generator1,
         )
-        MOOV(
+        bj.MOOV(
             id=client_id,
             reference_factory=bad_random_string_generator1,
         )
@@ -39,7 +39,7 @@ def test_provider():
             id=client_id,
             reference_factory=bad_random_string_generator2,
         )
-        MOOV(
+        bj.MOOV(
             id=client_id,
             reference_factory=bad_random_string_generator2,
         )

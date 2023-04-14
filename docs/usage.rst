@@ -9,23 +9,22 @@ Usage
 .. code-block:: python
 
     import os
-    from qosic import Client, MTN, MOOV
+    from qosic import Client, bj
 
     mtn_client_id = os.getenv("MTN_CLIENT_ID")
     moov_client_id = os.getenv("MTN_CLIENT_ID")
     server_login = os.getenv("SERVER_LOGIN")
     server_pass = os.getenv("SERVER_PASS")
 
+    mobile_carriers = [bj.MTN(id=mtn_client_id), bj.MOOV(id=moov_client_id)]
 
-    providers = [MTN(id=mtn_client_id), MOOV(id=moov_client_id)]
-
-    client = Client(providers=providers,  login=server_login, password=server_pass)
+    client = Client(mobile_carriers=mobile_carriers,  login=server_login, password=server_pass)
 
 
 The **Client** class is the main class of this library. the methods to perform the requests are defined on this class.
 These are the available keyword arguments:
 
-**providers** : List[Provider]
+**mobile_carriers** : List[MobileCarrier]
 
 A list of your providers, even if you want to supply only one provider, this must be a list.
 
@@ -37,10 +36,6 @@ Your api authentication user.
 **password**: str
 
 Your api authentication password.
-
-**debug**: bool = False
-
-If set to true, the client will print to console each request and response.
 
 
 2. Making a payment
