@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "qosic-sdk"
-version = "4.0.3"
+version = "5.0.0"
 description = "An unofficial python sdk for the QosIc platform."
 authors = ["Tobi-De <tobidegnon@protonmail.com>"]
 license = "MIT"
