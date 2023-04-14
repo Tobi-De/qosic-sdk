@@ -12,9 +12,6 @@ for businesses in Africa.
 .. image:: https://img.shields.io/pypi/pyversions/qosic-sdk
         :target: https://github.com/Tobi-De/qosic-sdk
 
-.. image:: https://api.travis-ci.com/Tobi-De/qosic-sdk.svg
-        :target: https://travis-ci.com/Tobi-De/qosic-sdk
-
 .. image:: https://readthedocs.org/projects/qosic-sdk/badge/?version=latest
         :target: https://qosic-sdk.readthedocs.io/en/latest/?version=latest
         :alt: Documentation Status
