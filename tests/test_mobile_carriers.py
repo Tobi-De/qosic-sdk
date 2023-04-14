@@ -1,7 +1,6 @@
 import pytest
 
-
-from qosic.providers import MTN, MOOV
+from qosic.mobile_carriers import bj
 from qosic.utils import get_random_string
 
 
@@ -17,16 +16,16 @@ def test_provider():
 
     client_id = "fake client id"
     with pytest.raises(AssertionError):
-        MTN(
+        bj.MTN(
             id=client_id,
             reference_factory=bad_random_string_generator,
         )
-        MOOV(
+        bj.MOOV(
             id=client_id,
             reference_factory=bad_random_string_generator,
         )
     with pytest.raises(AssertionError):
-        MTN(
+        bj.MTN(
             id=client_id,
             reference_factory=bad_random_string_generator1,
         )
@@ -36,7 +35,7 @@ def test_provider():
         )
 
     with pytest.raises(AssertionError):
-        MTN(
+        bj.MTN(
             id=client_id,
             reference_factory=bad_random_string_generator2,
         )
@@ -48,10 +47,10 @@ def test_provider():
 
 def test_mtn():
     with pytest.raises(TypeError):
-        MTN(step="joo", timeout=30, id="fake")
+        bj.MTN(step="joo", timeout=30, id="fake")
 
     with pytest.raises(AssertionError):
-        MTN(step=30, timeout=60, max_tries=6, id="fake")
+        bj.MTN(step=30, timeout=60, max_tries=6, id="fake")
 
     with pytest.raises(AssertionError):
-        MTN(step=30, timeout=500, max_tries=6, id="fake")
+        bj.MTN(step=30, timeout=500, max_tries=6, id="fake")

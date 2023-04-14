@@ -6,7 +6,11 @@ class UserAccountNotFoundError(Exception):
     pass
 
 
-class ProviderNotFoundError(Exception):
+class MobileCarrierNotFoundError(Exception):
+    pass
+
+
+class FeatureNotImplementedError(NotImplementedError):
     pass
 
 

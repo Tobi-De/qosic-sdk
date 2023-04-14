@@ -1,6 +1,6 @@
 """Top-level package for qosic-sdk."""
-from .api import Client  # noqa
-from .providers import MTN, MOOV  # noqa
+from .client import Client  # noqa
+from .mobile_carriers import bj
 from .utils import Result, Payer  # noqa
 
 __author__ = """Tobi DEGNON"""

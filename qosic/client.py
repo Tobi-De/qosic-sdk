@@ -5,18 +5,15 @@ from functools import partial
 import httpx
 from dataclasses import dataclass, field
 
-from .constants import QOSIC_BASE_URL
-from .errors import ProviderNotFoundError
 from .logger import logger as _logger
-from .protocols import Provider
-from .providers import MTN
-from .utils import Result, provider_by_phone, Payer, log_response, log_request
+from .protocols import MobileCarrier
+from .utils import Result, guess_mobile_carrier_from, Payer, log_response, log_request
 
 
 @dataclass
 class Client:
     """The synchronous client that will be used to make the request to the QosIc api
-    :param providers: The list of your provider
+    :param mobile_carriers: The list of your mobile_carrier
     :param login: Your server authentication login/user
     :param password: Your server authentication password
     :param logger: Custom logger
@@ -25,8 +22,8 @@ class Client:
 
     login: str
     password: str
-    providers: list[Provider]
-    base_url: str = QOSIC_BASE_URL
+    mobile_carriers: list[MobileCarrier]
+    base_url: str = "https://qosic.net:8443"
     logger: bool = _logger
     _http_client: httpx.Client = field(init=False, repr=False)
 
@@ -61,15 +58,15 @@ class Client:
         last_name: str,
     ) -> Result:
         payer = Payer(phone, amount, first_name, last_name)
-        provider = provider_by_phone(phone=phone, providers=self.providers)
-        return provider.pay(self._http_client, payer=payer)
+        mobile_carrier = guess_mobile_carrier_from(
+            phone=phone, mobile_carriers=self.mobile_carriers
+        )
+        return mobile_carrier.pay(self._http_client, payer=payer)
 
-    def refund(self, reference: str) -> Result:
-        # Only mtn support refund at the moment
-        mtn = None
-        for provider in self.providers:
-            if isinstance(provider, MTN):
-                mtn = provider
-        if not mtn:
-            raise ProviderNotFoundError("An mtn provider was not found")
-        return mtn.refund(self._http_client, reference=reference)
+    def refund(self, reference: str, phone: str) -> Result:
+        mobile_carrier = guess_mobile_carrier_from(
+            phone=phone, mobile_carriers=self.mobile_carriers
+        )
+        return mobile_carrier.refund(
+            self._http_client, reference=reference, phone=phone
+        )

@@ -52,7 +52,8 @@ For those of you in a hurry, here’s a sample code to get you started.
 
 
        from dotenv import dotenv_values
-       from qosic import Client, MTN, MOOV
+       from qosic import Client
+       from qosic.mobile_carriers import bj
 
        config = dotenv_values(".env")
 
@@ -68,14 +69,14 @@ For those of you in a hurry, here’s a sample code to get you started.
            client = Client(
                login=server_login,
                password=server_pass,
-               providers=[MTN(id=mtn_client_id), MOOV(id=moov_client_id)],
+               providers=[bj.MTN(id=mtn_client_id), bj.MOOV(id=moov_client_id)],
            )
            result = client.pay(phone=phone, amount=500, first_name="User", last_name="TEST")
            print(result)
            if result.success:
                print(f"Everything went fine")
 
-           result = client.refund(reference=result.reference)
+           result = client.refund(reference=result.reference, phone=phone)
            print(result)
 
 

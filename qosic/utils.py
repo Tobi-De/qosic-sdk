@@ -10,10 +10,10 @@ from typing import TYPE_CHECKING
 import httpx
 from dataclasses import dataclass
 
-from .errors import ProviderNotFoundError, InvalidPhoneNumberError
+from .errors import MobileCarrierNotFoundError, InvalidPhoneNumberError
 
 if TYPE_CHECKING:
-    from .protocols import Provider
+    from .protocols import MobileCarrier
 
 
 def log_request(request: httpx.Request, /, *, logger: Logger):
@@ -33,12 +33,14 @@ def get_random_string(length: int = 12) -> str:
     return "".join(secrets.choice(ascii_letters + digits) for _ in range(length))
 
 
-def provider_by_phone(*, phone: str, providers: list[Provider]) -> Provider:
+def guess_mobile_carrier_from(
+    *, phone: str, mobile_carriers: list[MobileCarrier]
+) -> MobileCarrier:
     prefix = phone[3:5]
-    for provider in providers:
-        if prefix in provider.allowed_prefixes:
-            return provider
-    raise ProviderNotFoundError(
+    for carrier in mobile_carriers:
+        if prefix in carrier.allowed_prefixes:
+            return carrier
+    raise MobileCarrierNotFoundError(
         f"A provider was not found for the given phone number: {phone}"
     )
 
@@ -53,7 +55,8 @@ class Result:
 
     status: Status
     reference: str
-    provider: Provider
+    phone: str
+    mobile_carrier: MobileCarrier
     response: httpx.Response
 
     @property
