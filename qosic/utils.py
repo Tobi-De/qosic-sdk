@@ -41,7 +41,7 @@ def guess_mobile_carrier_from(
         if prefix in carrier.allowed_prefixes:
             return carrier
     raise MobileCarrierNotFoundError(
-        f"A provider was not found for the given phone number: {phone}"
+        f"A mobile carrier was not found for the given phone number: {phone}"
     )
 
 
@@ -68,11 +68,23 @@ class Result:
 class Payer:
     phone: str
     amount: int
-    first_name: str | None = None
-    last_name: str | None = None
+    first_name: str = ""
+    last_name: str = ""
 
     def __post_init__(self):
         if not re.fullmatch(r"\d{11}", self.phone):
             raise InvalidPhoneNumberError(
                 f"Invalid format for {self.phone}, ex: 229XXXXXXXX"
             )
+
+    def to_qos_compliant_payment_request_body(
+        self, mobile_carrier: MobileCarrier
+    ) -> dict:
+        return {
+            "clientid": mobile_carrier.id,
+            "msisdn": self.phone,
+            "amount": str(self.amount),
+            "transref": mobile_carrier.reference_factory(self),
+            "firstname": self.first_name,
+            "lastname": self.last_name,
+        }

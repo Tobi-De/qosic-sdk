@@ -3,7 +3,7 @@ Usage
 =====
 
 
-# Initialize a client
+Initialize a client
 ----------------------
 
 .. code-block:: python
@@ -38,7 +38,7 @@ Your api authentication user.
 Your api authentication password.
 
 
-2. Making a payment
+Making a payment
 -------------------
 
 .. code-block:: python
@@ -72,7 +72,7 @@ The subscriber first name.
 The subscriber last name.
 
 
-3. Refunding a payment
+Refunding a payment
 ----------------------
 
 Refund are only available for MTN phone numbers for now. If you try a refund with a MOOV phone number, an
@@ -103,7 +103,7 @@ in the result object.
     print(result.reference) # qhdfnqf7a63
 
 
-4. Providers
+Providers
 ------------
 
 There are only two suppored providers for now, MTN and MOOV, and two
@@ -176,7 +176,7 @@ A function to get a reference number, this function receive the payer informatio
 return a 12 length string.
 
 
-5. Exceptions
+Exceptions
 -------------
 
 Here is all the exceptions available :

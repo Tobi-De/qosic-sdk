@@ -5,12 +5,11 @@ from dataclasses import dataclass, field
 
 from qosic.errors import FeatureNotImplementedError
 from qosic.mobile_carriers.utils import (
-    _generic_reference_factory,
-    _validate_reference_factory,
-    _req_body_from_payer,
-    _handle_common_errors,
-    _extract_json,
-    _resp_is_ok,
+    generic_reference_factory,
+    validate_reference_factory,
+    handle_common_errors,
+    get_json_from,
+    response_is_ok,
 )
 from ...utils import Payer, Result
 
@@ -22,17 +21,17 @@ MOOV_PAYMENT_PATH = "/QosicBridge/user/requestpaymentmv"
 class MOOV:
     id: str
     allowed_prefixes: list[str] = field(default_factory=lambda: MOOV_PREFIXES)
-    reference_factory: callable = _generic_reference_factory
+    reference_factory: callable = generic_reference_factory
 
     def __post_init__(self):
-        _validate_reference_factory(self.reference_factory)
+        validate_reference_factory(self.reference_factory)
 
     def pay(self, client: httpx.Client, *, payer: Payer) -> Result:
-        body = _req_body_from_payer(self, payer)
+        body = payer.to_qos_compliant_payment_request_body(self)
         response = client.post(url=MOOV_PAYMENT_PATH, json=body)
-        _handle_common_errors(response, provider=self, payer=payer)
-        json_content = _extract_json(response)
-        ok = _resp_is_ok(response) and json_content["responsecode"] == "0"
+        handle_common_errors(response, provider=self, payer=payer)
+        json_content = get_json_from(response)
+        ok = response_is_ok(response) and json_content["responsecode"] == "0"
         status = Result.Status.CONFIRMED if ok else Result.Status.FAILED
         return Result(
             reference=body["transref"],

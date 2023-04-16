@@ -11,22 +11,21 @@ from qosic.errors import (
     UserAccountNotFoundError,
     ServerError,
 )
-from qosic.protocols import MobileCarrier
-from qosic.utils import Payer, get_random_string
+from qosic.utils import get_random_string
 
 
-def _generic_reference_factory(*args, **kwargs) -> str:
+def generic_reference_factory(*args, **kwargs) -> str:
     return get_random_string()
 
 
-def _extract_json(response: httpx.Response):
+def get_json_from(response: httpx.Response) -> dict:
     try:
         return response.json()
     except json.decoder.JSONDecodeError:
         return {"responsecode": None}
 
 
-def _handle_common_errors(response: httpx.Response, **kwargs) -> None:
+def handle_common_errors(response: httpx.Response, **kwargs) -> None:
     status: int = response.status_code  # noqa
     if codes.is_server_error(status):
         raise ServerError(
@@ -46,23 +45,12 @@ def _handle_common_errors(response: httpx.Response, **kwargs) -> None:
         )
 
 
-def _validate_reference_factory(func: callable) -> None:
+def validate_reference_factory(func: callable) -> None:
     ref = func()
     assert isinstance(ref, str), "Your factory function should return strings"
     assert len(ref) > 6, "Your factory function generate too short strings"
     assert len(ref) <= 16, "Your factory function generate too long strings"
 
 
-def _req_body_from_payer(provider: MobileCarrier, payer: Payer) -> dict:
-    return {
-        "clientid": provider.id,
-        "msisdn": payer.phone,
-        "amount": str(payer.amount),
-        "transref": provider.reference_factory(payer),
-        "firstname": payer.first_name or "",
-        "lastname": payer.last_name or "",
-    }
-
-
-def _resp_is_ok(response: httpx.Response):
+def response_is_ok(response: httpx.Response):
     return response.status_code == httpx.codes.OK

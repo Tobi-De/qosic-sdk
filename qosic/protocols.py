@@ -2,8 +2,6 @@ from __future__ import annotations
 
 from typing import Protocol
 
-from httpx import Client
-
 from .utils import Result, Payer
 
 

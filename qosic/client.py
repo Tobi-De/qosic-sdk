@@ -54,8 +54,8 @@ class Client:
         *,
         phone: str,
         amount: int,
-        first_name: str | None = None,
-        last_name: str | None = None,
+        first_name: str = "",
+        last_name: str = "",
     ) -> Result:
         payer = Payer(
             phone=phone, amount=amount, first_name=first_name, last_name=last_name

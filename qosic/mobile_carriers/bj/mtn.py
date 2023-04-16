@@ -7,12 +7,11 @@ import polling2
 from dataclasses import dataclass, field
 
 from qosic.mobile_carriers.utils import (
-    _generic_reference_factory,
-    _validate_reference_factory,
-    _req_body_from_payer,
-    _handle_common_errors,
-    _extract_json,
-    _resp_is_ok,
+    generic_reference_factory,
+    validate_reference_factory,
+    handle_common_errors,
+    get_json_from,
+    response_is_ok,
 )
 from ...utils import Payer, Result
 
@@ -29,10 +28,10 @@ class MTN:
     timeout: int = 60 * 2
     max_tries: int | None = None
     allowed_prefixes: list[str] = field(default_factory=lambda: MTN_PREFIXES)
-    reference_factory: callable = _generic_reference_factory
+    reference_factory: callable = generic_reference_factory
 
     def __post_init__(self):
-        _validate_reference_factory(self.reference_factory)
+        validate_reference_factory(self.reference_factory)
         assert 5 <= self.step <= 30, f"Step {self.step} must be between 5 and 30"
         assert (
             60 <= self.timeout <= 180
@@ -43,9 +42,9 @@ class MTN:
             ), f"max_tries exceed timeout: {self.max_tries} * {self.step} > {self.timeout}"
 
     def pay(self, client: httpx.Client, *, payer: Payer) -> Result:
-        body = _req_body_from_payer(self, payer)
+        body = payer.to_qos_compliant_payment_request_body(self)
         response = client.post(url=MTN_PAYMENT_PATH, json=body)
-        _handle_common_errors(response, provider=self, payer=payer)
+        handle_common_errors(response, provider=self, payer=payer)
         res_dict = {
             "reference": body["transref"],
             "mobile_carrier": self,
@@ -71,10 +70,10 @@ class MTN:
             url=MTN_PAYMENT_STATUS_PATH,
             json={"clientid": self.id, "transref": reference},
         )
-        json_content = _extract_json(response)
-        if not _resp_is_ok(response) or json_content["responsecode"] is None:
+        json_content = get_json_from(response)
+        if not response_is_ok(response) or json_content["responsecode"] is None:
             raise MTNPaymentRejected()
-        if _resp_is_ok(response) and json_content["responsecode"] == "00":
+        if response_is_ok(response) and json_content["responsecode"] == "00":
             return Result.Status.CONFIRMED
         return Result.Status.FAILED
 
@@ -83,8 +82,10 @@ class MTN:
             url=MTN_REFUND_PATH,
             json={"clientid": self.id, "transref": reference},
         )
-        _handle_common_errors(response, provider=self)
-        ok = _resp_is_ok(response) and _extract_json(response)["responsecode"] == "00"
+        handle_common_errors(response, provider=self)
+        ok = (
+            response_is_ok(response) and get_json_from(response)["responsecode"] == "00"
+        )
         status = Result.Status.CONFIRMED if ok else Result.Status.FAILED
         return Result(
             reference=reference,
