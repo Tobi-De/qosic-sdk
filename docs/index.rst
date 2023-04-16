@@ -7,7 +7,7 @@ Welcome to qosic-sdk's documentation!
 
    readme
    installation
-   usage
+   usage_guide
    contributing
    authors
    history

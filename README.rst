@@ -55,16 +55,15 @@ For those of you in a hurry, here’s a sample code to get you started.
 
        moov_client_id = config.get("MOOV_CLIENT_ID")
        mtn_client_id = config.get("MTN_CLIENT_ID")
-       server_login = config.get("SERVER_LOGIN")
-       server_pass = config.get("SERVER_PASSWORD")
+
+       login = config.get("SERVER_LOGIN")
+       pass = config.get("SERVER_PASSWORD")
 
        def main():
            phone = "229XXXXXXXX"
-           client = Client(
-               login=server_login,
-               password=server_pass,
-               mobile_carriers=[bj.MTN(id=mtn_client_id), bj.MOOV(id=moov_client_id)],
-           )
+           mobile_carriers = [bj.MTN(id=mtn_client_id), bj.MOOV(id=moov_client_id)]
+           client = Client(login=login, password=pass, mobile_carriers=mobile_carriers)
+
            result = client.pay(phone=phone, amount=500)
            print(result)
            if result.success:

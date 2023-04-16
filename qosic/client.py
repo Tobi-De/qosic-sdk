@@ -13,7 +13,7 @@ from .utils import Result, guess_mobile_carrier_from, Payer, log_response, log_r
 @dataclass
 class Client:
     """The synchronous client that will be used to make the request to the QosIc api
-    :param mobile_carriers: The list of your mobile_carrier
+    :param mobile_carriers: The list of configured mobile carriers to use to communicate with the API.
     :param login: Your server authentication login/user
     :param password: Your server authentication password
     :param logger: Custom logger
