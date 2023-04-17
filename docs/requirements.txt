@@ -1,3 +1,3 @@
-httpx==0.23.3
+httpx==0.24.0
 polling2==0.5.0
-shibuya
+shibuya==2023.3.19
