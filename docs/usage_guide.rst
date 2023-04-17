@@ -86,6 +86,7 @@ by passing a custom logger to the ``Client`` class during initialization. For de
 level to display all the interactions with the payment API.
 
 .. code-block:: python
+
     import logging
 
     logging.basicConfig(level=logging.DEBUG)
@@ -97,7 +98,7 @@ level to display all the interactions with the payment API.
 Error Handling
 --------------
 
-If everything goes well, the ``pay()`` and ``refund()`` methods return a ``Result`` if the request completely fails to be
+If everything goes well, the ``pay()`` and ``refund()`` methods return a ``Result`` but if the request completely fails to be
 processed by the server, one the exceptions listed below is raised.
 
 * **ServerError** : raised when the qos server is busy or fails for some reason.
@@ -125,7 +126,7 @@ Use environment variables for your credentials
 ==============================================
 
 You should never hardcode your credentials in your code. Instead, you should use environment variables to store your credentials and then access them in your code.
-This includes your **login**, **password**, and  the **client_id** of all the mobile carriers.
+This includes your **login**, **password**, and  the **client_id** for all the mobile carriers you configured.
 
 
 
