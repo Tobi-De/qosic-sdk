@@ -62,7 +62,7 @@ For those of you in a hurry, here’s a sample code to get you started.
        def main():
            phone = "229XXXXXXXX"
            mobile_carriers = [bj.MTN(id=mtn_client_id), bj.MOOV(id=moov_client_id)]
-           client = Client(login=login, password=pass, mobile_carriers=mobile_carriers)
+           client = Client(login=login, password=password, mobile_carriers=mobile_carriers)
 
            result = client.pay(phone=phone, amount=500)
            print(result)
