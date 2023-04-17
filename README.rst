@@ -57,7 +57,7 @@ For those of you in a hurry, here’s a sample code to get you started.
        mtn_client_id = config.get("MTN_CLIENT_ID")
 
        login = config.get("SERVER_LOGIN")
-       pass = config.get("SERVER_PASSWORD")
+       password = config.get("SERVER_PASSWORD")
 
        def main():
            phone = "229XXXXXXXX"
