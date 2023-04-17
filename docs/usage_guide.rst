@@ -43,7 +43,7 @@ To make a payment using the ``Client`` class, you can call the ``pay()`` method 
     if result.success:
         print("Payment successful")
     else:
-        print("Payment failed. Error: ", result.error_message)
+        print("Payment failed. Error: ", result.response)
 
 Processing Refunds
 ------------------
@@ -59,7 +59,7 @@ To request a refund using the ``Client`` class, you can call the ``refund()`` me
     if result.success:
         print("Refund successful")
     else:
-        print("Refund failed. Error: ", result.error_message)
+        print("Refund failed. Error: ", result.response)
 
 
 ``Result`` class
@@ -76,7 +76,7 @@ A helper class that encapsulates the response from the server for a payment or r
 **Properties**
 
 -   **success** (bool): A property that indicates whether the request was successful or not. Returns ``True`` if the ``status``
-is ``Result.Status.CONFIRMED``, indicating a successful request, and ``False`` otherwise.
+    is ``Result.Status.CONFIRMED``, indicating a successful request, and ``False`` otherwise.
 
 Logging
 -------
