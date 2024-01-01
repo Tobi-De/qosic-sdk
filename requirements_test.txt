@@ -1,6 +1,6 @@
 pip==23.3.2
 flake8==6.1.0
-coverage==7.3.2
+coverage==7.4.0
 Sphinx==7.2.6
 httpx==0.26.0
 python-dotenv==1.0.0
