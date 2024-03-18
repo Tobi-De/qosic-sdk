@@ -13,7 +13,7 @@ from qosic.mobile_carriers.utils import (
 )
 from ...utils import Payer, Result
 
-MOOV_PREFIXES = ["55", "60", "63", "64", "65", "68", "94", "95", "98", "99"]
+MOOV_PREFIXES = ["55", "60", "63", "64", "65", "68", "94", "95", "98", "99", "58"]
 MOOV_PAYMENT_PATH = "/QosicBridge/user/requestpaymentmv"
 
 
