@@ -23,7 +23,7 @@ class Client:
     login: str
     password: str
     mobile_carriers: list[MobileCarrier]
-    base_url: str = "https://qosic.net:8443"
+    base_url: str = "https://api.qosic.net"
     logger: bool = _logger
     _http_client: httpx.Client = field(init=False, repr=False)
 
